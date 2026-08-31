@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TENNIS! 🎾</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a6b2a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    #gameCanvas {
+      display: block;
+      border: 4px solid #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.5);
+      cursor: pointer;
+      max-width: 100vw;
+      max-height: 95vh;
+    }
+
+    #muteBtn {
+      position: fixed;
+      top: 12px;
+      right: 16px;
+      background: rgba(255,255,255,0.2);
+      border: 2px solid #fff;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 20px;
+      padding: 6px 12px;
+      cursor: pointer;
+      z-index: 10;
+      user-select: none;
+    }
+    #muteBtn:hover { background: rgba(255,255,255,0.35); }
+  </style>
+</head>
+<body>
+
+<button id="muteBtn" title="Toggle sound">🔊</button>
+<canvas id="gameCanvas" width="800" height="520"></canvas>
+
+<script>
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const W = 800, H = 520;
+const SCORE_TO_WIN = 5;
+const PADDLE_W = 14, PADDLE_H = 90;
+const BALL_R = 10;
+const PLAYER_X = 30, CPU_X = W - 30 - PADDLE_W;
+const BALL_SPEED_INIT = 5;
+const BALL_SPEED_MAX = 11;
+const BALL_SPEED_INC = 0.35;   // speed boost per rally hit
+const CPU_SPEED = 3.2;          // intentionally beatable
+const CPU_MISS_FACTOR = 0.82;   // CPU only tracks ball 82% accurately
+const PLAYER_SPEED = 7;
+
+// Colours
+const C = {
+  court:      '#3a8a40',
+  courtLine:  'rgba(255,255,255,0.35)',
+  sky:        '#87ceeb',
+  ball:       '#f9e44a',
+  ballShadow: 'rgba(0,0,0,0.25)',
+  playerPad:  '#2979ff',
+  cpuPad:     '#ff6d00',
+  white:      '#ffffff',
+  scoreText:  '#ffffff',
+  overlay:    'rgba(0,0,0,0.55)',
+  startBg:    '#1565c0',
+  winGreen:   '#2e7d32',
+  losePink:   '#c62828',
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let phase = 'start';   // 'start' | 'serve' | 'play' | 'point' | 'end'
+let playerScore = 0, cpuScore = 0;
+let lastScorer = null;   // 'player' | 'cpu'
+let pointDelay = 0;
+
+let ball, playerPad, cpuPad;
+let ballSpeedMult = 1;
+
+let keys = {};
+let muted = false;
+let audioCtx = null;
+
+// ─── AUDIO ────────────────────────────────────────────────────────────────────
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playPock(freq = 440, dur = 0.06) {
+  if (muted) return;
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = freq;
+    osc.type = 'square';
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(); osc.stop(ctx.currentTime + dur);
+  } catch(e) {}
+}
+
+function playCheer() {
+  if (muted) return;
+  try {
+    const ctx = getAudio();
+    [523, 659, 784, 1047].forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = f;
+      osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.12;
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+      osc.start(t); osc.stop(t + 0.18);
+    });
+  } catch(e) {}
+}
+
+function playWin() {
+  if (muted) return;
+  try {
+    const ctx = getAudio();
+    [523, 659, 784, 659, 1047].forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = f;
+      osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.15;
+      gain.gain.setValueAtTime(0.2, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      osc.start(t); osc.stop(t + 0.22);
+    });
+  } catch(e) {}
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function resetBall(server = 'player') {
+  const angle = (Math.random() * 40 - 20) * Math.PI / 180;
+  const dir = server === 'player' ? 1 : -1;
+  ball = {
+    x: W / 2, y: H / 2,
+    vx: dir * BALL_SPEED_INIT * Math.cos(angle),
+    vy: BALL_SPEED_INIT * Math.sin(angle),
+    speed: BALL_SPEED_INIT,
+  };
+  ballSpeedMult = 1;
+}
+
+function resetPaddles() {
+  playerPad = { x: PLAYER_X, y: H / 2 - PADDLE_H / 2, w: PADDLE_W, h: PADDLE_H };
+  cpuPad    = { x: CPU_X,    y: H / 2 - PADDLE_H / 2, w: PADDLE_W, h: PADDLE_H };
+}
+
+function startGame() {
+  playerScore = 0; cpuScore = 0;
+  resetPaddles();
+  resetBall('player');
+  phase = 'serve';
+}
+
+// ─── UPDATE ───────────────────────────────────────────────────────────────────
+function updatePlay() {
+  // Player input
+  if ((keys['ArrowUp']   || keys['w'] || keys['W']) && playerPad.y > 0)
+    playerPad.y -= PLAYER_SPEED;
+  if ((keys['ArrowDown'] || keys['s'] || keys['S']) && playerPad.y < H - PADDLE_H)
+    playerPad.y += PLAYER_SPEED;
+
+  // CPU AI — tracks ball with intentional lag and imperfection
+  const cpuCenter = cpuPad.y + PADDLE_H / 2;
+  const targetY = ball.y * CPU_MISS_FACTOR + (H / 2) * (1 - CPU_MISS_FACTOR);
+  if (cpuCenter < targetY - 6 && cpuPad.y < H - PADDLE_H)
+    cpuPad.y += CPU_SPEED;
+  else if (cpuCenter > targetY + 6 && cpuPad.y > 0)
+    cpuPad.y -= CPU_SPEED;
+
+  // Move ball
+  ball.x += ball.vx;
+  ball.y += ball.vy;
+
+  // Wall bounce (top/bottom)
+  if (ball.y - BALL_R <= 0) {
+    ball.y = BALL_R; ball.vy = Math.abs(ball.vy);
+    playPock(300, 0.04);
+  }
+  if (ball.y + BALL_R >= H) {
+    ball.y = H - BALL_R; ball.vy = -Math.abs(ball.vy);
+    playPock(300, 0.04);
+  }
+
+  // Paddle collision — player
+  if (ball.vx < 0 &&
+      ball.x - BALL_R <= playerPad.x + playerPad.w &&
+      ball.x - BALL_R >= playerPad.x &&
+      ball.y >= playerPad.y - BALL_R &&
+      ball.y <= playerPad.y + PADDLE_H + BALL_R) {
+    ball.vx = Math.abs(ball.vx);
+    // Add spin based on where ball hits paddle
+    const hitPos = (ball.y - playerPad.y) / PADDLE_H - 0.5;
+    ball.vy = hitPos * 8;
+    ballSpeedMult = Math.min(ballSpeedMult + BALL_SPEED_INC / BALL_SPEED_INIT, BALL_SPEED_MAX / BALL_SPEED_INIT);
+    ball.vx *= ballSpeedMult;
+    ball.vy *= ballSpeedMult;
+    ball.x = playerPad.x + playerPad.w + BALL_R;
+    playPock(500, 0.07);
+  }
+
+  // Paddle collision — CPU
+  if (ball.vx > 0 &&
+      ball.x + BALL_R >= cpuPad.x &&
+      ball.x + BALL_R <= cpuPad.x + cpuPad.w &&
+      ball.y >= cpuPad.y - BALL_R &&
+      ball.y <= cpuPad.y + PADDLE_H + BALL_R) {
+    ball.vx = -Math.abs(ball.vx);
+    const hitPos = (ball.y - cpuPad.y) / PADDLE_H - 0.5;
+    ball.vy = hitPos * 8;
+    ballSpeedMult = Math.min(ballSpeedMult + BALL_SPEED_INC / BALL_SPEED_INIT, BALL_SPEED_MAX / BALL_SPEED_INIT);
+    ball.vx *= ballSpeedMult;
+    ball.vy *= ballSpeedMult;
+    ball.x = cpuPad.x - BALL_R;
+    playPock(400, 0.07);
+  }
+
+  // Scoring
+  if (ball.x + BALL_R < 0) {
+    cpuScore++;
+    lastScorer = 'cpu';
+    playCheer();
+    endPoint();
+  } else if (ball.x - BALL_R > W) {
+    playerScore++;
+    lastScorer = 'player';
+    playCheer();
+    endPoint();
+  }
+}
+
+function endPoint() {
+  if (playerScore >= SCORE_TO_WIN || cpuScore >= SCORE_TO_WIN) {
+    phase = 'end';
+    playWin();
+  } else {
+    phase = 'point';
+    pointDelay = 80;  // frames before next serve
+  }
+}
+
+function update() {
+  if (phase === 'play')  updatePlay();
+  if (phase === 'point') {
+    pointDelay--;
+    if (pointDelay <= 0) {
+      resetPaddles();
+      resetBall(lastScorer === 'cpu' ? 'cpu' : 'player');
+      phase = 'serve';
+    }
+  }
+}
+
+// ─── DRAW ─────────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+function drawCourt() {
+  // Sky gradient top strip
+  const sky = ctx.createLinearGradient(0, 0, 0, 60);
+  sky.addColorStop(0, '#87ceeb');
+  sky.addColorStop(1, C.court);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, 60);
+
+  // Court surface
+  ctx.fillStyle = C.court;
+  ctx.fillRect(0, 60, W, H - 60);
+
+  // Court lines
+  ctx.strokeStyle = C.courtLine;
+  ctx.lineWidth = 2;
+  // Centre line
+  ctx.setLineDash([12, 8]);
+  ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
+  ctx.setLineDash([]);
+  // Service boxes
+  ctx.beginPath(); ctx.moveTo(W*0.25, H*0.15); ctx.lineTo(W*0.75, H*0.15); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W*0.25, H*0.85); ctx.lineTo(W*0.75, H*0.85); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W*0.25, H*0.15); ctx.lineTo(W*0.25, H*0.85); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W*0.75, H*0.15); ctx.lineTo(W*0.75, H*0.85); ctx.stroke();
+}
+
+function drawPaddle(pad, color) {
+  const r = 6;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.roundRect(pad.x, pad.y, pad.w, pad.h, r);
+  ctx.fill();
+  // Highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.beginPath();
+  ctx.roundRect(pad.x + 2, pad.y + 4, pad.w - 4, pad.h / 3, r);
+  ctx.fill();
+}
+
+function drawBall() {
+  // Shadow
+  ctx.fillStyle = C.ballShadow;
+  ctx.beginPath();
+  ctx.ellipse(ball.x + 3, ball.y + 3, BALL_R, BALL_R * 0.7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Ball
+  const grad = ctx.createRadialGradient(ball.x - 3, ball.y - 3, 1, ball.x, ball.y, BALL_R);
+  grad.addColorStop(0, '#fff176');
+  grad.addColorStop(1, C.ball);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, BALL_R, 0, Math.PI * 2);
+  ctx.fill();
+  // Seam
+  ctx.strokeStyle = 'rgba(200,150,0,0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, BALL_R * 0.7, 0.3, Math.PI + 0.3);
+  ctx.stroke();
+}
+
+function drawScore() {
+  ctx.fillStyle = C.scoreText;
+  ctx.font = 'bold 42px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(playerScore, W / 2 - 70, 44);
+  ctx.fillText(cpuScore,    W / 2 + 70, 44);
+
+  ctx.font = '13px Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fillText('YOU', W / 2 - 70, 58);
+  ctx.fillText('BOB', W / 2 + 70, 58);
+
+  // Divider dot
+  ctx.fillStyle = C.scoreText;
+  ctx.font = 'bold 30px Arial';
+  ctx.fillText('—', W / 2, 44);
+}
+
+function drawOverlay(title, sub, btnText, btnColor) {
+  ctx.fillStyle = C.overlay;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = C.white;
+  ctx.font = 'bold 64px Arial';
+  ctx.fillText(title, W / 2, H / 2 - 60);
+
+  if (sub) {
+    ctx.font = '24px Arial';
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText(sub, W / 2, H / 2);
+  }
+
+  // Button
+  const bw = 220, bh = 60, bx = W / 2 - bw / 2, by = H / 2 + 30;
+  ctx.fillStyle = btnColor;
+  ctx.beginPath();
+  ctx.roundRect(bx, by, bw, bh, 12);
+  ctx.fill();
+  ctx.fillStyle = C.white;
+  ctx.font = 'bold 28px Arial';
+  ctx.fillText(btnText, W / 2, by + 41);
+}
+
+function drawServePrompt() {
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.font = '18px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('Press SPACE or tap to serve', W / 2, H - 18);
+}
+
+function drawStartScreen() {
+  drawCourt();
+  // Bouncing preview balls
+  ctx.fillStyle = C.overlay;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.textAlign = 'center';
+
+  // Title
+  ctx.font = 'bold 80px Arial';
+  const grad = ctx.createLinearGradient(W/2 - 200, 0, W/2 + 200, 0);
+  grad.addColorStop(0, '#f9e44a');
+  grad.addColorStop(0.5, '#ffffff');
+  grad.addColorStop(1, '#f9e44a');
+  ctx.fillStyle = grad;
+  ctx.fillText('🎾 TENNIS!', W / 2, H / 2 - 80);
+
+  ctx.font = '22px Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fillText('First to ' + SCORE_TO_WIN + ' points wins!', W / 2, H / 2 - 30);
+
+  ctx.font = '18px Arial';
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fillText('Arrow keys  ↑ ↓  or  W S  to move', W / 2, H / 2 + 10);
+
+  // Play button
+  const bw = 200, bh = 64, bx = W/2 - bw/2, by = H/2 + 40;
+  const btnGrad = ctx.createLinearGradient(bx, by, bx, by + bh);
+  btnGrad.addColorStop(0, '#43a047');
+  btnGrad.addColorStop(1, '#1b5e20');
+  ctx.fillStyle = btnGrad;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 14); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 14); ctx.stroke();
+  ctx.fillStyle = C.white;
+  ctx.font = 'bold 32px Arial';
+  ctx.fillText('▶  PLAY', W / 2, by + 43);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  if (phase === 'start') {
+    drawStartScreen();
+    return;
+  }
+
+  drawCourt();
+  drawScore();
+  drawPaddle(playerPad, C.playerPad);
+  drawPaddle(cpuPad, C.cpuPad);
+  drawBall();
+
+  if (phase === 'serve') {
+    drawServePrompt();
+  }
+
+  if (phase === 'point') {
+    const scorer = lastScorer === 'player' ? 'YOU score! 🎾' : 'BOB scores!';
+    const color = lastScorer === 'player' ? C.winGreen : C.losePink;
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.7;
+    ctx.fillRect(0, H/2 - 40, W, 70);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = C.white;
+    ctx.font = 'bold 36px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(scorer, W / 2, H / 2 + 8);
+  }
+
+  if (phase === 'end') {
+    const playerWon = playerScore >= SCORE_TO_WIN;
+    const title = playerWon ? '🏆 YOU WIN!' : '🤖 BOB WINS!';
+    const sub   = playerWon ? 'Amazing! Great rally!' : 'So close! Try again?';
+    const col   = playerWon ? '#2e7d32' : '#b71c1c';
+    drawOverlay(title, sub, 'PLAY AGAIN', col);
+  }
+}
+
+// ─── GAME LOOP ────────────────────────────────────────────────────────────────
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ─── INPUT ────────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  keys[e.key] = true;
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    handleAction();
+  }
+});
+document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+function handleAction() {
+  if (phase === 'start') { startGame(); }
+  if (phase === 'serve') { phase = 'play'; }
+  if (phase === 'end')   { startGame(); }
+}
+
+// Mouse / touch — click anywhere to advance, drag paddle
+canvas.addEventListener('click', handleAction);
+
+canvas.addEventListener('mousemove', e => {
+  if (phase !== 'play' && phase !== 'serve') return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleY = H / rect.height;
+  const mouseY = (e.clientY - rect.top) * scaleY;
+  playerPad.y = Math.max(0, Math.min(H - PADDLE_H, mouseY - PADDLE_H / 2));
+});
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (phase !== 'play' && phase !== 'serve') return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleY = H / rect.height;
+  const touchY = (e.touches[0].clientY - rect.top) * scaleY;
+  playerPad.y = Math.max(0, Math.min(H - PADDLE_H, touchY - PADDLE_H / 2));
+}, { passive: false });
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  handleAction();
+}, { passive: false });
+
+// Mute button
+document.getElementById('muteBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  muted = !muted;
+  e.target.textContent = muted ? '🔇' : '🔊';
+});
+
+// ─── START ────────────────────────────────────────────────────────────────────
+resetPaddles();
+resetBall('player');
+loop();
+</script>
+</body>
+</html>
