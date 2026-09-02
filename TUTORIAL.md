@@ -1,159 +1,281 @@
-# Build a Tennis Game with IBM Bob — Step-by-Step Tutorial
+# Build a Tennis Game with IBM Bob
+### A complete guide to AI-assisted development — from zero to a fully playable game
 
-> **What you'll build:** A fully playable browser tennis game in a single HTML file —
-> no framework, no server, no install. Open it on a laptop or share the link to a phone.
+> **What you will build:** A browser tennis game in a single HTML file.
+> No framework, no server, no install, no prior coding experience required.
+> Open it on a laptop. Share the link and play it on a phone. Give it to anyone.
 >
-> **Works on:** laptop (keyboard + mouse) and smartphone / tablet (full touch screen) — equally.
-> **How long it takes:** ~90 minutes end-to-end, following this guide.
-> Each step is a prompt you paste into IBM Bob (or any AI coding assistant).
+> **What you will actually learn:** How to build software by having a conversation
+> with an AI assistant — the skill that works for any project, not just this game.
 
 ---
 
-## Prerequisites
+## Before you start — read this first
 
-- A browser (Chrome, Firefox, Edge, Safari — any works, including mobile browsers)
-- IBM Bob (or another AI coding assistant such as GitHub Copilot, Claude, or ChatGPT)
-- A text editor — even Notepad will do; VS Code is nicer
-- No Node.js, npm, or build tools needed
+### You need exactly three things
 
-### Playing on a smartphone
+| What | Details |
+|---|---|
+| **IBM Bob** | Your AI coding assistant — the engine of everything in this tutorial |
+| **A browser** | Chrome, Firefox, Edge, or Safari — on a laptop, tablet, or smartphone |
+| **A text editor** | Notepad, TextEdit, VS Code, or any app that saves plain `.txt` files |
 
-The finished game is fully touch-screen playable — no keyboard needed:
+That is the complete list. No Node.js. No npm. No terminal. No accounts to create.
+No software to install beyond what you already have.
+
+---
+
+### The most important thing to understand before writing a single prompt
+
+**You cannot break anything.**
+
+Every time Bob gives you code, you get a complete, self-contained file.
+If you don't like what you get, you paste the previous version back and try a different prompt.
+If you lose track of where you were, every working version is saved in this repository —
+open any of the `v1`, `v2`, `v3a`, `v3b`, `v3c`, `v3d` folders and you are back on solid ground.
+
+Bob can undo, redo, rewrite, and refine anything in this domain without limit.
+There is no mistake you can make here that cannot be reversed in under a minute.
+
+**That means: experiment freely. Ask for things that seem too ambitious.
+Push Bob further than feels safe. The worst outcome is you paste the previous version back.**
+
+This is not a cautious tutorial. It is an invitation to play.
+
+---
+
+### What IBM Bob is — and how this tutorial uses it
+
+IBM Bob is an AI coding assistant. You describe what you want in plain English.
+Bob writes the code. You test it. You describe what to change. Bob rewrites it.
+That loop — describe, receive, test, feel, refine — is the entire workflow.
+
+You do not need to understand the code Bob writes to use this tutorial.
+Understanding will come naturally as you read the "What is happening here" sections,
+but it is never a prerequisite for moving to the next step.
+
+The prompts in this tutorial are carefully written to produce good results,
+but they are not magic spells. Bob will sometimes produce something slightly different
+from what is shown here. That is normal. Test it, play it, and if something feels wrong,
+the next section tells you exactly how to respond.
+
+---
+
+### Playing on a smartphone — no keyboard needed
+
+The finished game is fully touch-screen playable from the very first version.
+If you are following this tutorial on a phone, everything works.
 
 | Action | How |
 |---|---|
 | Move your paddle | Drag finger on the **left half** of the screen |
-| Move P2 paddle (2P mode) | Drag finger on the **right half** |
-| Serve | Tap anywhere |
-| Enter your name | Tap the name box → your phone keyboard appears; tap **OK ✓** to confirm |
-| Mute / unmute | Tap the 🔊 button (top-right corner) |
+| Move P2 paddle (2-player mode) | Drag finger on the **right half** of the screen |
+| Serve the ball | Tap anywhere on the screen |
+| Enter your name | Tap the name box — your phone keyboard appears automatically |
+| Mute / unmute sound | Tap the 🔊 button in the top-right corner |
 
-> **Tip for the event:** Share the link [zoran-polic.github.io/game-set-code](https://zoran-polic.github.io/game-set-code/) with participants — they can play on their own phones with no install.
-
----
-
-## How to use this tutorial
-
-1. Copy the **prompt** shown in each step
-2. Paste it into IBM Bob
-3. Bob returns a complete HTML file — copy it into your editor and save as `index.html`
-4. Open the file in your browser to test
-5. Move on to the next step
-
-Each step **builds on the previous one.** By the end you will have gone from zero to a full-featured game with power-ups, tournaments, and ball trails.
+> **Share the link:** Once you have a working version, open it in a browser on your phone,
+> share the URL with a friend, and they can play it on their phone immediately.
+> No install. No account. Just a link.
 
 ---
 
-## Architecture overview
+## How this tutorial works
 
-Every version is a **single self-contained `index.html`** with this structure:
+Each step gives you one prompt to paste into IBM Bob.
+Bob returns a complete HTML file.
+You save it as `index.html` and open it in your browser.
+You play it. You notice what you like and what you want to change.
+Then you move to the next step — or you go off-script and ask Bob for something else entirely.
+
+**The steps build on each other.** Each prompt says "upgrade my tennis game" —
+you always give Bob the file it just produced, so the full context carries forward.
+Only Step 1 starts from nothing.
+
+**The reference versions are always there.** Every step has a working result saved
+in this repository (`v1/index.html`, `v2/index.html`, etc.). If your version diverges
+or something stops working, open the reference version, continue from there, and keep going.
+
+---
+
+## The architecture — what Bob is building for you
+
+Every version in this tutorial is a single `index.html` file with this structure.
+You do not need to memorise this — it is here so you can find your way around when you are curious.
 
 ```
 index.html
-├── <style>    — all CSS (body background, canvas border, buttons)
-├── <canvas>   — the game is drawn here using HTML5 Canvas API
+├── <style>     — how everything looks (colours, sizes, layout)
+├── <canvas>    — a drawing surface; the entire game is drawn here 60 times per second
 └── <script>
-    ├── CONFIG / constants    — sizes, speeds, score limit
-    ├── State variables       — ball, paddles, scores, current phase
-    ├── Audio helpers         — Web Audio API beeps (no files!)
-    ├── Confetti helpers      — particle system for celebrations
-    ├── Game init             — reset functions for ball and paddles
-    ├── Update logic          — physics, AI, collision detection, scoring
-    ├── Draw functions        — one draw call per frame per element
-    ├── Screen draw functions — name entry, setup, serve, end screens
-    ├── Game loop             — requestAnimationFrame drives everything
-    └── Input handlers        — keyboard + mouse + touch
+    ├── CONFIG       — one place to change the game title, score limit, colours
+    ├── State        — variables that remember where everything is right now
+    ├── Audio        — sound effects generated by the browser, no audio files needed
+    ├── Physics      — how the ball moves, bounces, and speeds up
+    ├── AI           — how the CPU opponent decides where to move
+    ├── Draw         — instructions for painting every frame
+    ├── Screens      — the start screen, setup screen, end screen
+    ├── Game loop    — the engine that runs everything 60 times per second
+    └── Input        — keyboard, mouse, and touch all handled here
 ```
 
-This is **procedural JavaScript** — no classes, no modules. Perfect for vibe-coding with an AI assistant.
+This is plain JavaScript — no frameworks, no libraries, no build step.
+Bob writes it all from a description. You do not need to write any of it yourself.
 
 ---
 
-## Step 1 — The simplest possible game
+## Step 1 — The first game
 
-**What you get:** A bouncing ball, two paddles, score counter, CPU opponent.  
-**Time:** ~5 minutes
+**What you get:** A bouncing ball, two paddles, a score, and a CPU opponent.
+Playable on laptop keyboard and smartphone touch screen.
+**Time:** about 5 minutes.
 
-### Prompt
+### The prompt
+
+Copy this exactly and paste it into IBM Bob:
 
 ```
 Create a single self-contained HTML file tennis game using HTML5 Canvas.
 
 Requirements:
 - Canvas 800×520 pixels, centered on a green court background
-- Left paddle controlled by arrow keys (up/down) or W/S keys
-- Right paddle is a simple CPU that tracks the ball at speed 3.2, but only 82% accurately so kids can beat it
-- Yellow ball that bounces off top/bottom walls and paddles, speeding up slightly with each hit
+- Works on both desktop and smartphone — touch controls from the start:
+  dragging on the left half of the canvas moves the player paddle,
+  tapping anywhere serves the ball
+- Left paddle controlled by arrow keys (up/down) or W/S keys on desktop
+- Right paddle is a simple CPU that tracks the ball at speed 3.2,
+  but only 82% accurately so beginners can beat it
+- Yellow ball that bounces off top/bottom walls and paddles,
+  speeding up slightly with each hit (max speed 11)
 - Score displayed at the top: YOU vs BOB
 - First to 5 points wins
-- Start screen with a PLAY button
+- Start screen with a large PLAY button
 - End screen with "YOU WIN!" or "BOB WINS!" and a PLAY AGAIN button
-- No external files, no CDN, no npm — everything inline
+- Sound effects using Web Audio API — a short beep on paddle hit,
+  a cheer on point scored (no external audio files)
+- Mute toggle button fixed to top-right corner
+- No external files, no CDN, no npm — everything inline in one file
 ```
 
-**Test it:** Open `v1/index.html` from this repo to see the result.
+### Test it
 
-### What to look for in the code
+Save the file Bob gives you as `index.html`. Open it in your browser.
+Play a full game against the CPU. Try it on your phone too.
 
-- **`requestAnimationFrame(loop)`** — this is the game loop. It runs ~60 times per second.
-- **`updatePlay()`** — physics, collision detection, and CPU AI all happen here.
-- **`draw()`** — clears the canvas and redraws everything each frame.
-- **`ball.vx` / `ball.vy`** — velocity components. Flip `vy` on wall hit; flip `vx` on paddle hit.
+**Reference version:** `v1/index.html` in this repository.
+
+### What is happening here
+
+- **The canvas** is like a whiteboard. Bob's code clears it and redraws everything 60 times
+  per second — that is what makes the ball appear to move smoothly.
+- **The game loop** (`requestAnimationFrame`) is the engine driving those 60 redraws.
+  Every game ever made has one. You just got yours for free.
+- **Touch + keyboard together** — the same code handles both. Dragging a finger and
+  pressing an arrow key both update the same variable (`playerPad.y`).
+  The input method does not matter to the game logic.
+
+### If something feels off — how to refine
+
+Play the game. Then ask yourself: does anything feel wrong?
+Some things beginners often notice after Step 1:
+
+- *"The CPU is too fast / too easy"* →
+  `Make the CPU paddle slower and less accurate — I want young children to be able to win most of the time.`
+- *"The ball is too fast"* →
+  `Reduce the starting ball speed and the maximum speed slightly.`
+- *"The game looks plain"* →
+  `Make the court look more like a real outdoor tennis court — brighter green, white court lines, blue sky at the top.`
+
+Any of these is a valid next prompt. You do not have to follow the steps in order.
+Bob will incorporate your change and hand you back a complete updated file.
+
+**This is the core skill: play it, feel it, describe what you want different, trust Bob.**
 
 ---
 
-## Step 2 — Add setup, themes, 2-player mode, and stats
+## Step 2 — Setup screen, themes, 2-player mode, and stats
 
-**What you get:** A full-featured game with a setup screen, difficulty selector, court themes, 2-player support, localStorage stats, confetti, and sound.  
-**Time:** ~20 minutes
+**What you get:** A name entry screen. A setup screen where you choose difficulty,
+court theme, ball style, and game mode. Win/loss stats that survive page reloads.
+Confetti on win. Richer sound. Full 2-player mode.
+**Time:** about 20 minutes.
 
-### Prompt
+### The prompt
 
 ```
-Upgrade my tennis game HTML file with these features. Keep the same single-file approach.
+Upgrade my tennis game HTML file with these features. Keep the single-file approach.
 
-1. Name entry screen before setup — player types their name, press Enter to confirm
-2. Setup screen with clickable buttons for:
+1. Name entry screen — player types their name, press Enter or tap OK to confirm.
+   On touch devices, tapping the name box triggers the native phone keyboard.
+
+2. Setup screen with buttons for:
    - Difficulty: Easy / Medium / Hard (controls CPU speed and accuracy)
-   - Court theme: Classic green / Night blue / Clay red — each changes court + paddle colors
-   - Ball style: tennis ball, soccer ball, basketball, star emoji, heart emoji, or classic circle
-   - Mode: 1 Player (vs CPU) or 2 Players (P2 uses I/K keys and right-side mouse/touch)
+   - Court theme: Classic green / Night blue / Clay red
+   - Ball style: tennis ball, soccer ball, basketball, star ⭐, heart ❤️, circle
+   - Mode: 1 Player (vs CPU) or 2 Players (P2 uses I/K keys or right-side touch)
+
 3. Player stats stored in localStorage — wins, losses, current streak, best streak
-4. Confetti particle burst on win (canvas particles, no CSS animation)
-5. Sound effects using Web Audio API — pock on paddle hit, cheer on point, fanfare on win, click on buttons
-6. Mute toggle button fixed to top-right corner
-7. Touch support — dragging on left half of canvas moves P1 paddle; right half moves P2 paddle
-8. Top CONFIG block for easy customisation (nonprofit name, game title, score limit)
+   Shown on the end screen. Persist across page reloads.
+
+4. Confetti particle burst on win — canvas particles, no CSS animation.
+
+5. Sound effects using Web Audio API:
+   - Pock on paddle hit
+   - Ascending chime on point scored
+   - Fanfare on match win
+   - Click sound on button press
+
+6. Mute toggle button fixed to top-right corner, min 56×56px for easy tapping.
+
+7. Top CONFIG block for easy customisation:
+   const CONFIG = { gameTitle, scoreToWin, themes, ballEmojis }
+
+8. Touch support already works for paddle drag — make sure 2P right-side
+   touch drag works correctly for the second player too.
 ```
 
-**Test it:** Open `v2/index.html` from this repo.
+### Test it
 
-### Key concepts introduced in this step
+Play through the full flow: enter your name, choose settings, play a match,
+win (or let the CPU win), check the end screen stats. Try 2-player mode.
+Try it on a phone — tap the name box and confirm the phone keyboard appears.
 
-#### The CONFIG block
+**Reference version:** `v2/index.html`.
+
+### What is happening here
+
+#### The CONFIG block — change anything without touching the game logic
+
 ```js
 const CONFIG = {
-  nonprofitName: 'IBM Community',
-  gameTitle:     '🎾 TENNIS!',
-  poweredBy:     'Powered by IBM Bob',
-  scoreToWin:    5,
-  themes: { ... },
-  ballEmojis: [...],
+  gameTitle:  '🎾 TENNIS!',
+  scoreToWin: 5,
+  themes: {
+    classic: { court: '#3a8a40', sky: '#87ceeb', ... },
+    night:   { court: '#1a237e', sky: '#0d0d0d', ... },
+    clay:    { court: '#b5651d', sky: '#f4a460', ... },
+  },
 };
 ```
-A single object at the top means anyone can customise the game without reading the game logic.
 
-#### localStorage for persistence
+One object at the top. Change `scoreToWin` to 3 for a faster game.
+Change `gameTitle` to your school's name. No other code needs to change.
+
+#### localStorage — memory that survives the browser closing
+
 ```js
 let stats = { wins: 0, losses: 0, streak: 0, bestStreak: 0 };
 try {
-  const saved = JSON.parse(localStorage.getItem('ibmTennisStats') || '{}');
+  const saved = JSON.parse(localStorage.getItem('tennisStats') || '{}');
   Object.assign(stats, saved);
 } catch(e) {}
 ```
-Wrapped in `try/catch` because localStorage can fail in private browsing.
+
+`localStorage` is a small key-value store built into every browser.
+The `try/catch` wrapper protects against private browsing mode, where it is disabled.
 
 #### Sound with no audio files
+
 ```js
 function beep(freq, dur, type = 'square', vol = 0.15) {
   const ctx = new AudioContext();
@@ -165,16 +287,40 @@ function beep(freq, dur, type = 'square', vol = 0.15) {
   o.start(); o.stop(ctx.currentTime + dur);
 }
 ```
-The Web Audio API synthesises tones in real time — no `.mp3` files needed.
+
+The Web Audio API synthesises tones mathematically in real time.
+No `.mp3` files, no CDN, no internet connection needed.
+
+#### The hidden input trick — phone keyboard on a canvas
+
+The HTML canvas element cannot receive keyboard input directly.
+To trigger the phone keyboard when a player taps the name box,
+Bob adds an invisible `<input>` element off-screen and focuses it:
+
+```html
+<input id="nameInput" type="text"
+  style="position:fixed; opacity:0; top:50%; left:50%; width:1px; height:1px;
+         font-size:16px;">
+<!-- font-size:16px prevents iOS from auto-zooming the page on focus -->
+```
+
+When the player taps the name area on the canvas, the code calls `.focus()`
+on this invisible input. The phone keyboard appears. The player types.
+The value syncs back into the game state in real time.
+
+> **Why it works:** `focus()` must be called inside a user gesture handler
+> (a tap or click event). Calling it automatically on page load is blocked
+> by browsers to prevent unwanted keyboard pop-ups.
 
 ---
 
-## Step 3a — Progressive difficulty + ball trail
+## Step 3a — Progressive difficulty and ball trail
 
-**What you get:** The CPU gets faster every 2 points, adding tension as the game progresses. The ball leaves a ghost trail.  
-**Time:** ~10 minutes
+**What you get:** The CPU gets smarter as the game goes on — each 2 points scored
+makes it slightly faster, up to a maximum. The ball leaves a fading ghost trail.
+**Time:** about 10 minutes.
 
-### Prompt
+### The prompt
 
 ```
 Add two features to my tennis game HTML file:
@@ -182,114 +328,133 @@ Add two features to my tennis game HTML file:
 1. Progressive difficulty (single-player only):
    - CPU speed increases every 2 total points scored in the current game
    - Maximum of 8 speed boosts (capped so it never becomes impossible)
-   - Show a small "⚡ LVL X" badge in the score area while playing
+   - Show a small "⚡ LVL X" badge near the score while playing
    - Play a short ascending tone when the CPU levels up
 
 2. Ball trail effect:
    - Keep a ring buffer of the last 8 ball positions
-   - Draw them behind the ball each frame with decreasing opacity (newest = most opaque)
-   - Scale down older positions slightly so they taper to a point
+   - Draw them behind the ball each frame with decreasing opacity
+     (newest position = most opaque, oldest = nearly invisible)
+   - Scale down older positions slightly so the trail tapers to a point
    - Works for both canvas-drawn balls and emoji balls
 ```
 
-**Test it:** Open `v3a/index.html`.
+### Test it
 
-### Key concepts introduced
+Play until the CPU reaches Level 3 or 4. Notice how the game shifts from easy
+to tense. Watch the ball trail — does it feel satisfying? Too long? Too short?
 
-#### Ring buffer (fixed-size history)
+**Reference version:** `v3a/index.html`.
+
+### What is happening here
+
+#### The ring buffer — a fixed-size sliding history
+
 ```js
-let trail = [];   // positions array, max TRAIL_LENGTH items
+let trail = [];
 
-// Before moving the ball each frame:
+// Each frame, before moving the ball:
 trail.push({ x: ball.x, y: ball.y });
-if (trail.length > TRAIL_LENGTH) trail.shift();  // drop oldest
+if (trail.length > 8) trail.shift();  // drop the oldest position
 ```
 
-#### Drawing with decreasing opacity
+`push` adds to the end. `shift` removes from the start.
+The array never grows longer than 8 items — it slides forward in time.
+This pattern appears everywhere: undo history, autocomplete suggestions,
+network packet buffers. You just built one.
+
+#### Drawing opacity that fades with age
+
 ```js
 for (let i = 0; i < trail.length; i++) {
-  const age = (i + 1) / trail.length;   // 0 = oldest, 1 = newest
+  const age = (i + 1) / trail.length;  // 0 = oldest, 1 = newest
   ctx.globalAlpha = age * 0.35;
   ctx.beginPath();
   ctx.arc(trail[i].x, trail[i].y, BALL_R * (0.4 + age * 0.5), 0, Math.PI * 2);
   ctx.fill();
 }
-ctx.globalAlpha = 1;   // always reset after custom alpha!
+ctx.globalAlpha = 1;  // always reset — leaving this out breaks all subsequent drawing
 ```
 
 ---
 
 ## Step 3b — Power-ups
 
-**What you get:** Three collectible power-ups that appear on the court. The ball picks them up on contact.  
-**Time:** ~15 minutes
+**What you get:** Three collectible power-ups that appear randomly on the court.
+The ball picks them up on contact. Each one changes the game for a few seconds.
+**Time:** about 15 minutes.
 
-### Prompt
+### The prompt
 
 ```
 Add a power-up system to my tennis game HTML file:
 
 Three power-up types that randomly appear on the court every 3–6 seconds:
 - ⚡ Speed Boost: the ball fires at near-max speed on the next hit
-- 🛡️ Big Paddle: the paddle height grows by 40% for ~6 seconds  
-- 🎯 Aim Assist: the CPU aims less accurately for ~5 seconds / player aims better
+- 🛡️ Big Paddle: the collecting player's paddle grows 40% taller for ~6 seconds
+- 🎯 Aim Assist: the CPU aims less accurately for ~5 seconds
 
 Behaviour:
 - Only one power-up on the court at a time
-- Power-up appears as a pulsing, glowing emoji circle in the middle third of the court
-- The ball collects it on contact (proximity check)
-- The power-up goes to the side whose ball direction indicates they just hit it
+- Appears as a pulsing glowing emoji circle in the middle third of the court
+- The ball collects it on contact (proximity check using Math.hypot)
+- The power-up goes to the side whose ball direction shows they just hit it
 - Show a colour-coded progress bar above the active paddle during the effect
-- Display a flash message on collection ("⚡ SPEED BOOST!")
+- Flash a message on collection ("⚡ SPEED BOOST!")
 - Play a rising three-note pickup sound on collection
 - Power-ups clear between points
 ```
 
-**Test it:** Open `v3b/index.html`.
+### Test it
 
-### Key concepts introduced
+Play until a power-up appears. Aim for it deliberately. Notice that it assigns
+to the side that hit the ball toward it — this is the fairness mechanic.
+Does the CPU ever collect them? (It should.) Does the progress bar feel clear?
 
-#### Proximity collision detection
+**Reference version:** `v3b/index.html`.
+
+### What is happening here
+
+#### Circle collision with `Math.hypot`
+
 ```js
 const dx = ball.x - powerup.x;
 const dy = ball.y - powerup.y;
 if (Math.hypot(dx, dy) < BALL_R + POWERUP_RADIUS) {
-  // collected!
+  // ball has touched the power-up
 }
 ```
-`Math.hypot` is the cleanest way to compute 2D distance.
 
-#### Pulsing animation without CSS
-```js
-activePowerup.pulse++;  // increments every frame
-const scale = 1 + 0.12 * Math.sin(activePowerup.pulse * 0.12);
-```
-A sine wave driven by a frame counter gives smooth looping animation.
+`Math.hypot(dx, dy)` is the straight-line distance between two points —
+the Pythagorean theorem in one function. If that distance is less than
+the sum of both radii, the circles overlap. This is circle-circle collision detection.
 
-#### Timed effects with frame countdown
+#### Timed effects with a frame countdown
+
 ```js
-// On collection:
+// When a power-up is collected:
 playerEffect = { id: 'grow', framesLeft: 350 };
 
-// Each frame in updatePlay():
+// Every frame in the update loop:
 if (playerEffect) {
   playerEffect.framesLeft--;
   if (playerEffect.framesLeft <= 0) playerEffect = null;
 }
-
-// In draw:
-const pct = playerEffect.framesLeft / 350;
-ctx.fillRect(pad.x, pad.y - 10, (pad.w + 2) * pct, 6);  // progress bar
 ```
+
+No `setTimeout`, no `Date.now()`. The game already runs a loop 60 times per second —
+a counter that decrements each frame *is* a timer. 350 frames ÷ 60 fps ≈ 5.8 seconds.
 
 ---
 
-## Step 3c — Tournament mode (best of 3 sets)
+## Step 3c — Tournament mode
 
-**What you get:** A full best-of-3 match. Each game is one set. A set-end overlay shows the score and auto-transitions. The match-end screen shows the full history.  
-**Time:** ~15 minutes
+**What you get:** A full best-of-3 match. Each game is one set.
+A set-end overlay shows the score and auto-transitions.
+The match-end screen shows the full history.
+**Time:** about 15 minutes.
 
-### Prompt
+### The prompt
 
 ```
 Add tournament mode to my tennis game HTML file:
@@ -297,13 +462,14 @@ Add tournament mode to my tennis game HTML file:
 Rules:
 - A match is best of 3 sets (first to win 2 sets wins the match)
 - A set is first to 5 points (existing score limit)
-- After a set ends, show a set-end overlay for 3 seconds with the set score, then auto-start the next set
+- After a set ends, show a set-end overlay for 3 seconds
+  with the set score, then auto-start the next set
 - After the match ends, show a detailed match-end screen
 
 Set-end overlay must show:
 - Who won the set and the score (e.g. "YOU WIN SET 2!  4 – 3")
 - Current match standing (e.g. "Match: YOU 1 · BOB 1")
-- "Next set starting..." countdown message
+- "Next set starting in 3..." countdown
 
 Match-end screen must show:
 - Winner announcement
@@ -312,234 +478,457 @@ Match-end screen must show:
 - Win/loss stats from localStorage
 - Play Again and Setup buttons
 
-Scoreboard changes:
-- Replace the stats ribbon at the bottom during play with set history scores
-- Add set dots to the score display (filled yellow circle per set won, hollow per remaining)
+Scoreboard changes during play:
+- Add set dots to the score display (filled circle per set won, hollow per remaining)
 - Show "SET X" label between the dot groups
+- Replace the stats ribbon at the bottom with set history scores
 ```
 
-**Test it:** Open `v3c/index.html`.
+### Test it
 
-### Key concepts introduced
+Play a full 3-set match. Watch the overlay between sets.
+Check the match-end screen shows the correct per-set scores.
+Test that Play Again resets everything cleanly.
 
-#### Nested state machine
-The game now has phases within phases — `phase` controls the top-level screen, and `setHistory` accumulates results:
+**Reference version:** `v3c/index.html`.
+
+### What is happening here
+
+#### A state machine inside a state machine
+
+The `phase` variable has always controlled which screen to show.
+Tournament mode adds transitions *within* the game phase:
 
 ```
-phase: 'serve' → 'play' → 'point' → 'serve' → ...
-                                  ↓ (set over)
-                              'setEnd' (3 sec) → 'serve' (new set)
-                                              ↓ (match over)
-                                          'matchEnd'
+'serve' → 'play' → 'point' → 'serve' (loop within a set)
+                            ↓ set over
+                         'setEnd' — 3-second overlay — auto → 'serve' (new set)
+                                                              ↓ match over
+                                                           'matchEnd'
 ```
 
-#### Accumulating history
+Every screen, transition, and overlay is just a value of `phase`.
+This pattern — a variable that controls which code runs — scales to any complexity.
+
+#### Accumulating history across sets
+
 ```js
 let setHistory = [];
 
 // When a set ends:
-setHistory.push({ p: playerScore, c: cpuScore });
+setHistory.push({ player: playerScore, cpu: cpuScore });
 
-// To display it:
+// To display it on the match-end screen:
 setHistory.forEach((s, i) => {
-  ctx.fillText(`Set ${i+1}: YOU ${s.p} – ${s.c} BOB`, W/2, y);
+  ctx.fillText(`Set ${i+1}:  YOU ${s.player} – ${s.cpu}  BOB`, W/2, y);
+  y += 32;
 });
 ```
 
 ---
 
-## Step 3d — Full edition (everything combined)
+## Step 3d — Full edition (everything together)
 
-**What you get:** All three v3 features working together: progressive difficulty + ball trail + power-ups + tournament mode.  
-**Time:** ~15 minutes
+**What you get:** All three v3 features running simultaneously —
+progressive difficulty, ball trail, power-ups, and tournament mode —
+tuned to work together without conflicts.
+**Time:** about 15 minutes.
 
-### Prompt
+### The prompt
 
 ```
-Combine all these features into one tennis game HTML file:
+Combine all features into one tennis game HTML file:
 
-From v3a: Progressive CPU difficulty (speed increases every 2 points, up to 8 boosts) + ball trail (8-position ring buffer, fading ghost copies)
-From v3b: Power-ups (⚡ speed boost · 🛡️ big paddle · 🎯 aim assist) — spawn every 3–6 seconds, ball collects on proximity, coloured progress bar on paddle, flash message on pickup
-From v3c: Tournament mode (best of 3 sets, set-end overlay, match-end screen with full history, set dots in scoreboard)
+From v3a:
+- Progressive CPU difficulty: speed increases every 2 points, up to 8 boosts
+- Ball trail: 8-position ring buffer, fading ghost copies behind the ball
+
+From v3b:
+- Power-ups (⚡ speed boost · 🛡️ big paddle · 🎯 aim assist)
+  — spawn every 3–6 seconds, ball collects on proximity,
+  coloured progress bar on active paddle, flash message on pickup
+
+From v3c:
+- Tournament mode: best of 3 sets, set-end overlay, match-end screen
+  with full per-set history, set dots in the scoreboard
 
 Integration rules:
-- CPU speed boost resets to base speed at the start of each set
-- Power-ups clear between sets (and between points)
-- Level indicator moves to top-right corner of the court (not cluttering the score strip)
+- CPU speed boost resets to base speed at the start of each new set
+- Power-ups clear between sets and between points
+- Level indicator sits in the top-right corner of the court
 - Set history replaces the stats ribbon at the bottom during play
 ```
 
-**Test it:** Open `v3d/index.html` or the root `index.html` — they are the same file.
+### Test it
+
+Play a full tournament match. Check that the CPU levels up within a set
+but resets when the next set begins. Collect a power-up late in a tight set.
+Watch the ball trail through a power-up pickup.
+
+**Reference version:** `v3d/index.html` (also the root `index.html`).
 
 ---
 
-## Step 4 — Smartphone support (play on any device)
+## Step 4 — Native smartphone polish
 
-**What you get:** The fully-featured game works on any phone or tablet — touch controls, name entry via the native keyboard, canvas that fills any screen size. Share the link and anyone can play.
-**Time:** ~10 minutes
+**What you get:** Your game already plays on phones — touch paddle control
+has been there since Step 1. This step makes it *feel native*: the canvas
+fills any screen without scrolling, the phone keyboard appears automatically
+for name entry, and every hint text adapts to the device in hand.
+**Time:** about 10 minutes.
 
-### Prompt
+### The prompt
 
 ```
-Make my tennis game fully playable on smartphones with touch-screen controls only.
-No keyboard required for anything.
+Polish my tennis game for smartphones. Touch paddle control already works —
+this step is about layout, name entry, and adaptive instructions.
 
-Requirements:
-1. Responsive canvas — the canvas should fill the viewport on any screen size
-   (phone portrait, tablet landscape, desktop) without scrolling or overflow.
-   Use CSS min() to size it correctly: width fills the screen,
-   height maintains the 800×560 aspect ratio.
+1. Responsive canvas layout:
+   The canvas should fill the viewport on any screen size
+   (phone portrait, tablet landscape, desktop widescreen)
+   without scrolling or letterboxing.
+   Use CSS min() to size it: width fills the screen,
+   height preserves the 800×560 aspect ratio.
+   Use 100dvh alongside 100vh for the browser address bar on mobile.
 
-2. Mobile name entry — on the name screen, show a tap-to-confirm OK button.
-   When the player taps the name input box, a hidden off-screen <input> element
-   gets focused to trigger the native keyboard. The input value syncs into
-   the game's name buffer in real time.
+2. Native mobile name entry:
+   When the player taps the name input area on the canvas, focus a hidden
+   off-screen <input> element to trigger the native phone keyboard.
+   Show a visible OK ✓ button to confirm (instead of requiring Enter).
+   Set font-size:16px on the hidden input to prevent iOS auto-zoom.
 
-3. Touch-aware hint text — detect touch devices at runtime using
-   ('ontouchstart' in window) || (navigator.maxTouchPoints > 0).
-   Show different instructions for touch vs keyboard:
-   - Name screen: "Tap the name box to type" + OK button instead of "press Enter"
-   - Serve prompt: "Drag your side to move · tap to serve" instead of arrow key instructions
-   - 2P mode serve: "Drag left half (P1) · right half (P2) · tap to serve"
+3. Adaptive hint text — detect touch vs keyboard at runtime:
+   const isTouchDevice = () =>
+     ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+   Call this when drawing each screen (not once at startup —
+   a laptop with a touchscreen can switch modes).
 
-4. Larger touch targets — mute button: min 56×56px, flex-centered.
+   Touch hints:          "Drag your side to move · tap to serve"
+   Keyboard hints:       "↑↓ or W/S to move · Space to serve"
+   2P touch:             "Drag left (P1) · right (P2) · tap to serve"
 
-Keep all existing keyboard/mouse controls working on desktop.
-Do not break any gameplay features.
+4. Minimum 56×56px touch targets for the mute button and all UI buttons.
+
+Keep all existing keyboard and mouse controls working on desktop.
+Do not remove or break any gameplay features.
 ```
 
-**Test it:** Open `index.html` on your phone — scan the QR code below or share the link.
+### Test it
 
-> 🌐 **[zoran-polic.github.io/game-set-code](https://zoran-polic.github.io/game-set-code/)**
+Open the finished file on your phone. Does the canvas fill the screen without
+scrollbars? Tap the name box — does the phone keyboard appear?
+Type your name and tap OK. Play a full game using only touch.
+Then open it on a laptop and confirm keyboard controls still work.
 
-### Key concepts introduced
+> 🌐 **Live version:** [zoran-polic.github.io/game-set-code](https://zoran-polic.github.io/game-set-code/)
+
+### What is happening here
 
 #### Responsive canvas with CSS `min()`
+
 ```css
 #gameCanvas {
-  width:  min(100vw, calc(95vh * 800 / 560));
-  height: min(95vh,  calc(100vw * 560 / 800));
+  width:  min(100vw, calc(95dvh * 800 / 560));
+  height: min(95dvh, calc(100vw * 560 / 800));
 }
 ```
-This keeps the canvas as large as possible while fitting both dimensions — no JavaScript needed.
-`dvh` (dynamic viewport height) accounts for the browser address bar on mobile: use `100dvh` alongside `100vh` for broadest support.
+
+`min()` picks the smaller of two values, so the canvas never overflows either
+dimension. The fractions (`800/560`) preserve the aspect ratio.
+`dvh` (dynamic viewport height) shrinks when the mobile browser address bar
+is visible, preventing the canvas from hiding behind it.
 
 #### Detecting touch vs keyboard at runtime
-```js
-const isTouchDevice = () => ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-```
-Call it when drawing each screen, not once at startup — a device with a detachable keyboard changes state.
-
-#### The hidden input trick
-The Canvas API has no text input — you can't focus a `<canvas>` for typing. The solution: add an invisible `<input>` off-screen and focus it programmatically. The native keyboard appears, the user types, and you sync the value back to your game state:
-
-```html
-<input id="nameInput" type="text"
-  inputmode="text" autocomplete="off" autocapitalize="words"
-  style="position:fixed; opacity:0; pointer-events:none;
-         top:50%; left:50%; width:1px; height:1px;
-         font-size:16px;">  <!-- font-size:16px prevents iOS auto-zoom -->
-```
 
 ```js
-const nameInputEl = document.getElementById('nameInput');
-
-// Sync typing → game state
-nameInputEl.addEventListener('input', () => {
-  nameBuffer = nameInputEl.value.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 10);
-});
-
-// Focus on tap (must happen inside a user gesture handler)
-function focusNameInput() {
-  nameInputEl.style.pointerEvents = 'auto';
-  nameInputEl.focus();
-  nameInputEl.style.pointerEvents = 'none';
-}
+const isTouchDevice = () =>
+  ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 ```
 
-> ⚠️ `focus()` only works inside a **user gesture** (tap/click handler). You cannot auto-focus on page load on mobile.
+Called *while drawing each screen*, not once at startup.
+A Surface Pro user might detach the keyboard mid-game.
+The instruction text updates automatically.
 
 ---
 
-## Full version progression summary
+## After each step — the feedback loop
 
-| Version | Lines | What's new |
+This is the part of the tutorial that has nothing to do with code.
+
+Once you have a working version, **stop prompting and start playing.**
+
+Ask yourself:
+- Is this fun? If not, why not?
+- Is the CPU too easy? Too hard? Does it feel fair?
+- Is there a moment that feels satisfying — a long rally, a narrow win?
+- Is there anything that feels broken, slow, or confusing?
+- What would make you want to keep playing?
+
+Your answers to these questions are your next prompts.
+You do not need technical vocabulary to describe them.
+
+> *"The ball moves too fast when the CPU levels up — it stops feeling fair"*
+> *"The power-up appears too often and it clutters the court"*
+> *"The end screen disappears too quickly — I want to see my stats longer"*
+> *"I want the court to look like night-time from the first screen"*
+
+All of these are perfect prompts. Bob understands plain descriptions of experience.
+The best game designers are not necessarily the best programmers —
+they are the people who play obsessively and notice what feels wrong.
+**That skill is yours already.**
+
+---
+
+## The vibe-coding mindset — how to prompt well
+
+You do not need to be a programmer to use Bob effectively.
+But a few habits make the difference between good results and great results.
+
+### Be specific about what you see, not what you think the code should do
+
+| ❌ Vague | ✅ Specific |
+|---|---|
+| "Make it better" | "The CPU paddle snaps instantly to the ball — make it feel like it has weight and momentum" |
+| "Fix the bug" | "When I miss the ball, the next serve fires immediately with no pause — add a 1-second delay" |
+| "Make it more fun" | "Add a short screen-flash effect when someone scores a point" |
+| "Improve the graphics" | "Draw a net in the middle of the court — a thin white rectangle with a small white post at the top" |
+
+### Always describe the constraint alongside the change
+
+> "Add a slow-motion effect when the ball is about to go out of bounds —
+> **but only for half a second and only if the player is close to the ball**."
+
+Constraints are what separate a fun feature from a broken one.
+Bob respects them.
+
+### Trust the first result — then refine
+
+Bob's first answer is rarely perfect and does not need to be.
+Accept it, test it, then give a follow-up prompt that describes specifically
+what to change. Two focused prompts reliably beat one overly-specified prompt.
+
+### When Bob gets it wrong
+
+Sometimes Bob misunderstands a prompt. Sometimes the result has a bug.
+Neither is a reason to stop.
+
+The recovery is always the same:
+1. Describe exactly what is wrong in plain language
+2. Add: *"The rest of the game should stay exactly as it is."*
+3. If Bob introduces a new problem while fixing the old one: paste the previous version back and try a differently-worded prompt
+
+Bob learns from context within a session. Describe what you tried and what happened.
+The more specific your description of the problem, the more targeted the fix.
+
+---
+
+## Going further — 12 prompts to take this anywhere
+
+Once you have completed all the steps, the game is yours to take in any direction.
+These prompts work as starting points — modify them, combine them, or use them
+as inspiration for something entirely your own.
+
+---
+
+**Visual — make it look different**
+
+```
+Draw a proper tennis net in the middle of the court —
+a thin white rectangle, 6px wide, with a small white post at the top.
+The ball should not pass through it — treat it as a wall it bounces off.
+```
+
+```
+Add a shadow beneath the ball that grows larger and lighter
+as the ball moves toward the center of the court and smaller
+and darker as it moves toward the walls.
+This should make the court feel three-dimensional.
+```
+
+```
+Add a particle burst at the exact pixel where the ball hits a paddle —
+12 small sparks that fly outward in random directions and fade over 20 frames.
+Match the spark colour to the paddle colour.
+```
+
+---
+
+**Gameplay — make it play different**
+
+```
+Add a rally counter in the middle of the court that shows the current
+number of consecutive hits without a miss. Make it glow yellow when
+it reaches 5 and pulse red when it reaches 10.
+Reset it to zero when either player misses.
+```
+
+```
+Add a "ghost ball" mode as an option on the setup screen.
+When active, the ball turns invisible for 1.5 seconds after each serve,
+then reappears. The player has to predict where it will be.
+```
+
+```
+Add a wall that appears randomly in the middle of the court for 4 seconds
+then disappears. The ball bounces off it. It should appear in a random
+vertical position but always be a fixed size (80px tall, 12px wide).
+```
+
+---
+
+**Social — make it better to share**
+
+```
+Add a shareable score card on the match-end screen.
+It shows: player name, final score, longest rally, number of power-ups collected.
+Display it as a styled box with a "Copy result" button that copies
+a plain-text version to the clipboard, formatted like:
+🎾 TENNIS! — [name] won 2-1 (Sets) · Best rally: 14 · Power-ups: 3
+```
+
+```
+Add an achievement system. Show a toast notification for:
+- "First Win!" on the first win
+- "Hot Streak! 🔥" after 3 wins in a row
+- "Survived Level 5! ⚡" when the CPU reaches level 5 and the player is still winning
+- "Power-up Hunter! 🎯" after collecting 5 power-ups in one match
+Store unlocked achievements in localStorage and show a trophy count on the end screen.
+```
+
+---
+
+**Platform — make it reach more people**
+
+```
+Add a QR code to the end screen that encodes the game's URL
+so anyone who watches can scan it and play immediately.
+Generate the QR code using only canvas drawing — no external libraries.
+```
+
+```
+Make the game installable as a Progressive Web App.
+Add a manifest.json section inline in the HTML (as a <script type="application/json">)
+and a minimal service worker registered from within the HTML file
+so the game works offline and can be added to the phone home screen.
+Keep everything in one file.
+```
+
+---
+
+**Completely different direction — use this as a template**
+
+```
+I want to change this tennis game into a brick-breaker game.
+Keep the canvas size, the audio system, the CONFIG block, the localStorage stats,
+the confetti, and the responsive layout.
+Replace the two paddles and CPU with: a single paddle at the bottom
+that the player controls, and a grid of 5×8 coloured bricks at the top.
+The ball bounces off the paddle and destroys bricks on contact.
+The game ends when all bricks are cleared (win) or the ball passes the paddle (lose).
+```
+
+```
+Turn this tennis game into a typing speed game for kids.
+Keep the canvas, audio, confetti, and responsive layout.
+Show a word in the middle of the screen. The player types it as fast as possible
+on a keyboard or taps the letters on an on-screen keyboard drawn on the canvas.
+Track words per minute. Show 10 words per round. Store the best score in localStorage.
+```
+
+---
+
+## How to build anything with Bob — the transferable skill
+
+The tennis game is finished. The skill you used to build it applies to anything.
+
+Here is the pattern, stripped to its core:
+
+**1. Describe the simplest possible version.**
+Not the full vision — the first slice. Something you can test in under 5 minutes.
+Bob is better at producing a small thing well than a large thing approximately.
+
+**2. Test it with real use.**
+Not "does the code look right" — does it *feel* right when you use it?
+The gap between those two questions is where the real design work happens.
+
+**3. Describe one change at a time.**
+Compound prompts ("change X and also Y and also Z") produce compound errors.
+One change per prompt keeps the results clean and the debugging trivial.
+
+**4. Treat every output as a draft.**
+Bob's first answer is a starting point, not a finished product.
+The best outputs come from a conversation, not a single prompt.
+
+**5. Save working versions before changing them.**
+Before asking Bob to make a big change, save the current file.
+If the change produces something worse, you have an immediate fallback.
+
+**6. Name what you feel, not what you think the fix is.**
+"This feels unfair when the CPU gets a power-up" is a better prompt
+than "reduce the CPU power-up probability to 0.3."
+Bob can reason about fairness. You might not know the right probability.
+Describe the experience; let Bob find the mechanism.
+
+---
+
+## Version history
+
+| Version | File | What is new |
 |---|---|---|
-| v1 | ~530 | Canvas game loop, physics, CPU AI, start/end screens |
-| v2 | ~800 | Setup screen, themes, 2P, localStorage stats, confetti, sound, touch |
-| v3a | ~830 | Progressive difficulty, ball trail |
-| v3b | ~950 | Power-up system (spawn, collect, effects, UI) |
-| v3c | ~940 | Tournament mode (sets, overlays, history screen) |
-| v3d | ~870 | All features combined, tuned to work together |
-| v4 | ~990 | Smartphone support — responsive layout, touch name entry, adaptive hints |
+| v1 | `v1/index.html` | Canvas game loop, physics, CPU AI, start/end screens, touch paddle control |
+| v2 | `v2/index.html` | Name entry, setup screen, themes, 2-player, localStorage stats, confetti, sound |
+| v3a | `v3a/index.html` | Progressive CPU difficulty, ball trail |
+| v3b | `v3b/index.html` | Power-up system (spawn, collect, effects, progress bar) |
+| v3c | `v3c/index.html` | Tournament mode (sets, overlays, match history screen) |
+| v3d | `v3d/index.html` | All v3 features combined and integrated |
+| v4 | `index.html` | Responsive canvas, native phone keyboard for name entry, adaptive hint text |
 
 ---
 
 ## Concepts reference card
 
-| Concept | Where it appears | One-liner |
+For the curious — every concept used in this game, where it first appears, and what it does.
+
+| Concept | First appears | What it does |
 |---|---|---|
-| Game loop | Every version | `requestAnimationFrame(loop)` — runs 60×/sec |
-| State machine | Every version | `phase` variable controls which screen draws |
-| Collision detection | Every version | Ball vs paddle: bounding-box + velocity direction check |
-| Ball physics | Every version | `ball.x += ball.vx` each frame; flip component on bounce |
-| CPU AI | Every version | Move toward `ball.y * missFactor` — imperfect on purpose |
-| Web Audio API | v1+ | `createOscillator()` — synthesised beeps, no MP3 files |
-| Canvas particles | v2+ | Confetti: array of `{x, y, vx, vy, life}` objects, remove when `life ≤ 0` |
-| localStorage | v2+ | `JSON.stringify` / `JSON.parse` — persist stats across sessions |
-| Ring buffer | v3a+ | `push` + `shift` at fixed max length — efficient sliding window |
-| Proximity check | v3b+ | `Math.hypot(dx, dy) < r1 + r2` — circle-circle collision |
-| Frame countdown | v3b+ | `framesLeft--` each update — simple timer without `setTimeout` |
-| Accumulating state | v3c+ | `setHistory.push({p, c})` — grow array of results over time |
-| CONFIG block | v2+ | Top-level object for nonprofit customisation without touching logic |
-| Touch input | v2+ | `touchmove` / `touchstart` events; `e.touches[0]` for first finger |
-| Responsive canvas | v4 | CSS `min()` sizes canvas to fill any viewport without JS |
-| Hidden input trick | v4 | Off-screen `<input>` + `focus()` triggers mobile keyboard on canvas tap |
-| Runtime device detect | v4 | `isTouchDevice()` adapts hint text without two separate code paths |
-
----
-
-## Going further — prompt ideas
-
-Once you've completed all the steps, try these on your own:
-
-```
-Add a rally counter that shows the current streak of consecutive hits without a miss.
-Show it in the middle of the court and make it glow when it reaches 10.
-```
-
-```
-Add a "ghost ball" mode where the ball turns invisible for 1 second after each serve,
-then reappears. Toggle it as a difficulty option on the setup screen.
-```
-
-```
-Add a simple particle burst at the exact point where the ball hits a paddle —
-tiny sparks that fly outward and fade over 20 frames.
-```
-
-```
-Add a shot angle indicator: when the player's paddle is moving, show a faint dotted
-arc predicting where the ball will go after the hit. Hide it 0.5 seconds after each hit.
-```
-
-```
-Add an achievement system: show a toast notification for milestones like
-"First win!", "3 in a row!", "Survived level 5!". Store them in localStorage.
-```
+| Game loop | v1 | `requestAnimationFrame(loop)` — runs ~60 times/sec, drives everything |
+| State machine | v1 | `phase` variable controls which screen draws and which input is active |
+| Ball physics | v1 | `ball.x += ball.vx` each frame; flip `vx` on paddle hit, `vy` on wall hit |
+| Collision detection | v1 | Bounding-box check (paddle) + velocity direction check (is the ball moving toward it?) |
+| CPU AI | v1 | Move toward `ball.y * missFactor` — intentionally imperfect |
+| Web Audio API | v1 | `createOscillator()` — synthesised tones, no audio files |
+| Touch input | v1 | `touchmove` / `touchstart` events; `e.touches[0]` for the first finger |
+| CONFIG block | v2 | Top-level object; change the game without touching logic |
+| localStorage | v2 | `JSON.stringify` / `JSON.parse` — persist stats across sessions |
+| Canvas particles | v2 | Confetti: array of `{x,y,vx,vy,life}` objects; remove when `life ≤ 0` |
+| Hidden input trick | v2 | Off-screen `<input>` focused programmatically to trigger mobile keyboard |
+| Ring buffer | v3a | `push` + `shift` at fixed max length — efficient sliding window of history |
+| Frame countdown | v3b | `framesLeft--` each update — simple timer without `setTimeout` |
+| Proximity collision | v3b | `Math.hypot(dx, dy) < r1 + r2` — circle-circle overlap test |
+| Sine animation | v3b | `Math.sin(frame * 0.12)` — smooth looping pulse without CSS |
+| Nested state machine | v3c | Phases within phases — set flow inside match flow |
+| Accumulating history | v3c | `array.push(result)` — grow a record of results over time |
+| Responsive canvas | v4 | CSS `min()` — fills any viewport without JS |
+| Runtime device detect | v4 | `isTouchDevice()` — adapts hints without two code paths |
 
 ---
 
 ## About this project
 
-This game was built at the **IBM Volunteer Event: GAME, SET, CODE**  
-**Date:** September 9, 2026 | IBM RTP, Durham NC  
-**Built with:** [IBM Bob](https://ibm.com/bob) — IBM's AI coding assistant  
-**Target audience:** Children ages 5–10 at nonprofit early education programs
+This game was built for the **IBM Volunteer Event: GAME, SET, CODE**
+at IBM RTP, Durham NC, on September 9, 2026.
 
-Every line of code in this repository was generated through prompts to IBM Bob,
-then refined through follow-up prompts — exactly the workflow you followed in this tutorial.
+Every line of code was generated through prompts to **IBM Bob** —
+IBM's AI coding assistant — then refined through follow-up prompts.
+No code was written by hand.
+
+The same workflow, described in this tutorial, applies to any project:
+a game, a tool, a website, a script, a data analysis, a presentation generator.
+If you can describe what you want, you can build it.
+
+**Live demo:** [zoran-polic.github.io/game-set-code](https://zoran-polic.github.io/game-set-code/)
+**IBM Bob:** [ibm.com/products/watson-code-assistant](https://www.ibm.com/products/watson-code-assistant)
 
 ---
 
-*Happy coding!  🎾*
+*Happy building. 🎾*
