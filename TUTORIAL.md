@@ -1,19 +1,34 @@
 # Build a Tennis Game with IBM Bob — Step-by-Step Tutorial
 
-> **What you'll build:** A fully playable browser tennis game in a single HTML file —  
+> **What you'll build:** A fully playable browser tennis game in a single HTML file —
 > no framework, no server, no install. Just open it and play.
 >
-> **How long it takes:** ~90 minutes end-to-end, following this guide.  
+> **Works on:** Desktop (keyboard + mouse) and **smartphone / tablet (full touch screen)**.
+> **How long it takes:** ~90 minutes end-to-end, following this guide.
 > Each step is a prompt you paste into IBM Bob (or any AI coding assistant).
 
 ---
 
 ## Prerequisites
 
-- A browser (Chrome, Firefox, Edge, Safari — any works)
+- A browser (Chrome, Firefox, Edge, Safari — any works, including mobile browsers)
 - IBM Bob (or another AI coding assistant such as GitHub Copilot, Claude, or ChatGPT)
 - A text editor — even Notepad will do; VS Code is nicer
 - No Node.js, npm, or build tools needed
+
+### Playing on a smartphone
+
+The finished game is fully touch-screen playable — no keyboard needed:
+
+| Action | How |
+|---|---|
+| Move your paddle | Drag finger on the **left half** of the screen |
+| Move P2 paddle (2P mode) | Drag finger on the **right half** |
+| Serve | Tap anywhere |
+| Enter your name | Tap the name box → your phone keyboard appears; tap **OK ✓** to confirm |
+| Mute / unmute | Tap the 🔊 button (top-right corner) |
+
+> **Tip for the event:** Share the link [zoran-polic.github.io/game-set-code](https://zoran-polic.github.io/game-set-code/) with participants — they can play on their own phones with no install.
 
 ---
 
@@ -388,6 +403,9 @@ Integration rules:
 | Frame countdown | v3b+ | `framesLeft--` each update — simple timer without `setTimeout` |
 | Accumulating state | v3c+ | `setHistory.push({p, c})` — grow array of results over time |
 | CONFIG block | v2+ | Top-level object for nonprofit customisation without touching logic |
+| Touch input | v2+ | `touchmove` / `touchstart` events; `e.touches[0]` for first finger |
+| Responsive canvas | v2+ | CSS `min()` sizes canvas to fill viewport on any screen |
+| Hidden input trick | v2+ | Off-screen `<input>` with `focus()` triggers mobile keyboard without UI change |
 
 ---
 

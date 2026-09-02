@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>🎾 TENNIS! — IBM Bob Edition v3d</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -14,6 +14,7 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      min-height: 100dvh;
       font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
       overflow: hidden;
       touch-action: none;
@@ -24,8 +25,11 @@
       border: 4px solid #fff;
       border-radius: 8px;
       box-shadow: 0 0 40px rgba(0,0,0,0.5);
+      /* Fill the viewport on any screen size */
+      width: min(100vw, calc(95vh * 800 / 560));
+      height: min(95vh, calc(100vw * 560 / 800));
       max-width: 100vw;
-      max-height: 95vh;
+      max-height: 95dvh;
     }
 
     #muteBtn {
@@ -41,15 +45,31 @@
       cursor: pointer;
       z-index: 10;
       user-select: none;
-      min-width: 48px;
-      min-height: 48px;
+      min-width: 56px;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    #muteBtn:hover { background: rgba(255,255,255,0.35); }
+    #muteBtn:hover, #muteBtn:active { background: rgba(255,255,255,0.35); }
+
+    /* Hidden native input for mobile keyboard on name screen */
+    #nameInput {
+      position: fixed;
+      opacity: 0;
+      pointer-events: none;
+      top: 50%;
+      left: 50%;
+      width: 1px;
+      height: 1px;
+      font-size: 16px; /* prevents iOS zoom */
+    }
   </style>
 </head>
 <body>
 
 <button id="muteBtn" title="Toggle sound">🔊</button>
+<input id="nameInput" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" maxlength="10">
 <canvas id="gameCanvas" width="800" height="560"></canvas>
 
 <script>
@@ -185,6 +205,7 @@ function saveStats() {
 let nameBuffer   = '';
 let p2Buffer     = '';
 let namingP2     = false;
+const isTouchDevice = () => ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 
 let confetti = [];
 
@@ -657,10 +678,18 @@ function drawNameScreen() {
   roundRect(W/2-160, 218, 320, 54, 8, 'rgba(255,255,255,0.15)', 'rgba(255,255,255,0.6)');
   ctx.fillStyle = '#fff'; ctx.font = 'bold 30px Arial';
   ctx.fillText((buf || '_') + (Math.floor(Date.now()/500) % 2 ? '|' : ''), W/2, 254);
+  const isTouch = isTouchDevice();
   ctx.font = '16px Arial'; ctx.fillStyle = 'rgba(255,255,255,0.55)';
-  ctx.fillText('Type your name and press Enter', W/2, 298);
-  ctx.font = '14px Arial'; ctx.fillStyle = 'rgba(255,255,255,0.4)';
-  ctx.fillText('(press Enter to use default)', W/2, 322);
+  ctx.fillText(isTouch ? 'Tap the name box to type' : 'Type your name and press Enter', W/2, 298);
+  // Tap-to-confirm button for touch
+  if (isTouch) {
+    roundRect(W/2-100, 316, 200, 52, 12, '#2e7d32');
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 22px Arial';
+    ctx.fillText('OK  ✓', W/2, 350);
+  } else {
+    ctx.font = '14px Arial'; ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillText('(press Enter to use default)', W/2, 322);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -735,10 +764,17 @@ function drawSetupScreen() {
 // ═══════════════════════════════════════════════════════════════════════════════
 function drawServePrompt() {
   ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.font = '18px Arial'; ctx.textAlign = 'center';
-  ctx.fillText(twoPlayer
-    ? `${playerName}: ↑↓ / WS    ${p2Name}: I K  —  Space to serve`
-    : 'Arrow keys  ↑↓  or  W S  to move  ·  Space or tap to serve',
-    W/2, H - 18);
+  if (isTouchDevice()) {
+    ctx.fillText(twoPlayer
+      ? 'Drag left half (P1) · right half (P2) · tap to serve'
+      : 'Drag your side to move  ·  tap to serve',
+      W/2, H - 18);
+  } else {
+    ctx.fillText(twoPlayer
+      ? `${playerName}: ↑↓ / WS    ${p2Name}: I K  —  Space to serve`
+      : 'Arrow keys  ↑↓  or  W S  to move  ·  Space or tap to serve',
+      W/2, H - 18);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -827,18 +863,38 @@ function loop() { update(); draw(); requestAnimationFrame(loop); }
 // ═══════════════════════════════════════════════════════════════════════════════
 //  INPUT — KEYBOARD
 // ═══════════════════════════════════════════════════════════════════════════════
+// Hidden input drives mobile keyboard — syncs value into nameBuffer / p2Buffer
+const nameInputEl = document.getElementById('nameInput');
+nameInputEl.addEventListener('input', () => {
+  const val = nameInputEl.value.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 10);
+  nameInputEl.value = val;
+  if (!namingP2) nameBuffer = val; else p2Buffer = val;
+});
+nameInputEl.addEventListener('blur', () => {
+  // Re-focus if still on name screen (keeps keyboard up on Android)
+  if (phase === 'name') setTimeout(() => { try { nameInputEl.focus(); } catch(e){} }, 50);
+});
+
+function focusNameInput() {
+  nameInputEl.value = namingP2 ? p2Buffer : nameBuffer;
+  nameInputEl.style.pointerEvents = 'auto';
+  try { nameInputEl.focus(); } catch(e) {}
+  nameInputEl.style.pointerEvents = 'none';
+}
+function confirmName() {
+  const buf = namingP2 ? p2Buffer : nameBuffer;
+  if (!namingP2) {
+    playerName = buf.trim() || 'YOU';
+    if (setupSelection.twoPlayer) { namingP2 = true; p2Buffer = ''; nameBuffer = ''; focusNameInput(); }
+    else { phase = 'setup'; nameInputEl.blur(); }
+  } else { p2Name = buf.trim() || 'P2'; phase = 'setup'; nameInputEl.blur(); }
+  playClick();
+}
+
 document.addEventListener('keydown', e => {
   keys[e.key] = true;
   if (phase === 'name') {
-    if (e.key === 'Enter') {
-      const buf = namingP2 ? p2Buffer : nameBuffer;
-      if (!namingP2) {
-        playerName = buf.trim() || 'YOU';
-        if (setupSelection.twoPlayer) { namingP2 = true; p2Buffer = ''; }
-        else { phase = 'setup'; }
-      } else { p2Name = buf.trim() || 'P2'; phase = 'setup'; }
-      playClick(); return;
-    }
+    if (e.key === 'Enter') { confirmName(); return; }
     if (e.key === 'Backspace') {
       if (namingP2) p2Buffer = p2Buffer.slice(0, -1); else nameBuffer = nameBuffer.slice(0, -1); return;
     }
@@ -870,6 +926,13 @@ function hitBtn(pt, btn) {
 }
 function handleClick(pt) {
   playClick();
+  if (phase === 'name') {
+    // Tap the name input box → focus keyboard
+    if (hitBtn(pt, { x: W/2-160, y: 218, w: 320, h: 54 })) { focusNameInput(); return; }
+    // Tap the OK button (touch devices)
+    if (isTouchDevice() && hitBtn(pt, { x: W/2-100, y: 316, w: 200, h: 52 })) { confirmName(); return; }
+    return;
+  }
   if (phase === 'setup') {
     for (const [key, btn] of Object.entries(setupBtns)) {
       if (!hitBtn(pt, btn)) continue;
@@ -881,7 +944,7 @@ function handleClick(pt) {
         currentDiff = setupSelection.diff; currentTheme = setupSelection.theme; twoPlayer = setupSelection.twoPlayer;
         const emojis = ['🎾', ...CONFIG.ballEmojis.slice(1), null];
         currentBallEmoji = emojis[setupSelection.emoji] === '●' ? null : emojis[setupSelection.emoji];
-        if (twoPlayer && p2Name === 'P2') { namingP2 = true; p2Buffer = ''; phase = 'name'; }
+        if (twoPlayer && p2Name === 'P2') { namingP2 = true; p2Buffer = ''; phase = 'name'; focusNameInput(); }
         else { startMatch(); }
       }
     }
@@ -891,7 +954,7 @@ function handleClick(pt) {
   if (phase === 'matchEnd') {
     const histY = H/2 - 42 + setHistory.length * 26;
     if (hitBtn(pt, { x: W/2-120, y: histY+54,  w: 240, h: 50 })) { startMatch(); return; }
-    if (hitBtn(pt, { x: W/2-72,  y: histY+116, w: 144, h: 42 })) { namingP2 = false; phase = 'name'; return; }
+    if (hitBtn(pt, { x: W/2-72,  y: histY+116, w: 144, h: 42 })) { namingP2 = false; nameBuffer = ''; phase = 'name'; if (isTouchDevice()) focusNameInput(); return; }
     startMatch();
   }
 }
