@@ -373,6 +373,94 @@ Integration rules:
 
 ---
 
+## Step 4 — Smartphone support (play on any device)
+
+**What you get:** The fully-featured game works on any phone or tablet — touch controls, name entry via the native keyboard, canvas that fills any screen size. Share the link and anyone can play.
+**Time:** ~10 minutes
+
+### Prompt
+
+```
+Make my tennis game fully playable on smartphones with touch-screen controls only.
+No keyboard required for anything.
+
+Requirements:
+1. Responsive canvas — the canvas should fill the viewport on any screen size
+   (phone portrait, tablet landscape, desktop) without scrolling or overflow.
+   Use CSS min() to size it correctly: width fills the screen,
+   height maintains the 800×560 aspect ratio.
+
+2. Mobile name entry — on the name screen, show a tap-to-confirm OK button.
+   When the player taps the name input box, a hidden off-screen <input> element
+   gets focused to trigger the native keyboard. The input value syncs into
+   the game's name buffer in real time.
+
+3. Touch-aware hint text — detect touch devices at runtime using
+   ('ontouchstart' in window) || (navigator.maxTouchPoints > 0).
+   Show different instructions for touch vs keyboard:
+   - Name screen: "Tap the name box to type" + OK button instead of "press Enter"
+   - Serve prompt: "Drag your side to move · tap to serve" instead of arrow key instructions
+   - 2P mode serve: "Drag left half (P1) · right half (P2) · tap to serve"
+
+4. Larger touch targets — mute button: min 56×56px, flex-centered.
+
+Keep all existing keyboard/mouse controls working on desktop.
+Do not break any gameplay features.
+```
+
+**Test it:** Open `index.html` on your phone — scan the QR code below or share the link.
+
+> 🌐 **[zoran-polic.github.io/game-set-code](https://zoran-polic.github.io/game-set-code/)**
+
+### Key concepts introduced
+
+#### Responsive canvas with CSS `min()`
+```css
+#gameCanvas {
+  width:  min(100vw, calc(95vh * 800 / 560));
+  height: min(95vh,  calc(100vw * 560 / 800));
+}
+```
+This keeps the canvas as large as possible while fitting both dimensions — no JavaScript needed.
+`dvh` (dynamic viewport height) accounts for the browser address bar on mobile: use `100dvh` alongside `100vh` for broadest support.
+
+#### Detecting touch vs keyboard at runtime
+```js
+const isTouchDevice = () => ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+```
+Call it when drawing each screen, not once at startup — a device with a detachable keyboard changes state.
+
+#### The hidden input trick
+The Canvas API has no text input — you can't focus a `<canvas>` for typing. The solution: add an invisible `<input>` off-screen and focus it programmatically. The native keyboard appears, the user types, and you sync the value back to your game state:
+
+```html
+<input id="nameInput" type="text"
+  inputmode="text" autocomplete="off" autocapitalize="words"
+  style="position:fixed; opacity:0; pointer-events:none;
+         top:50%; left:50%; width:1px; height:1px;
+         font-size:16px;">  <!-- font-size:16px prevents iOS auto-zoom -->
+```
+
+```js
+const nameInputEl = document.getElementById('nameInput');
+
+// Sync typing → game state
+nameInputEl.addEventListener('input', () => {
+  nameBuffer = nameInputEl.value.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 10);
+});
+
+// Focus on tap (must happen inside a user gesture handler)
+function focusNameInput() {
+  nameInputEl.style.pointerEvents = 'auto';
+  nameInputEl.focus();
+  nameInputEl.style.pointerEvents = 'none';
+}
+```
+
+> ⚠️ `focus()` only works inside a **user gesture** (tap/click handler). You cannot auto-focus on page load on mobile.
+
+---
+
 ## Full version progression summary
 
 | Version | Lines | What's new |
@@ -383,6 +471,7 @@ Integration rules:
 | v3b | ~950 | Power-up system (spawn, collect, effects, UI) |
 | v3c | ~940 | Tournament mode (sets, overlays, history screen) |
 | v3d | ~870 | All features combined, tuned to work together |
+| v4 | ~990 | Smartphone support — responsive layout, touch name entry, adaptive hints |
 
 ---
 
@@ -404,8 +493,9 @@ Integration rules:
 | Accumulating state | v3c+ | `setHistory.push({p, c})` — grow array of results over time |
 | CONFIG block | v2+ | Top-level object for nonprofit customisation without touching logic |
 | Touch input | v2+ | `touchmove` / `touchstart` events; `e.touches[0]` for first finger |
-| Responsive canvas | v2+ | CSS `min()` sizes canvas to fill viewport on any screen |
-| Hidden input trick | v2+ | Off-screen `<input>` with `focus()` triggers mobile keyboard without UI change |
+| Responsive canvas | v4 | CSS `min()` sizes canvas to fill any viewport without JS |
+| Hidden input trick | v4 | Off-screen `<input>` + `focus()` triggers mobile keyboard on canvas tap |
+| Runtime device detect | v4 | `isTouchDevice()` adapts hint text without two separate code paths |
 
 ---
 
