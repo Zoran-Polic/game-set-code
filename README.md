@@ -12,9 +12,9 @@
 | 📖 **Step-by-step tutorial** | [TUTORIAL.md](TUTORIAL.md) |
 | 📐 **Game spec** | [SPEC.md](SPEC.md) |
 
-> Works on any modern browser — Chrome, Firefox, Edge, Safari.  
-> No login, no install, no internet required after the page loads.  
-> Mobile touch-friendly too.
+> **Laptop or phone — just open the link and play.**
+> Works on any modern browser: Chrome, Firefox, Edge, Safari.
+> Keyboard + mouse on desktop · full touch controls on mobile · no install, no login.
 
 ---
 
@@ -80,11 +80,22 @@ Each version is a **single self-contained HTML file** — download any one and o
 
 ## Controls
 
+### Laptop / keyboard
+
 | Action | Player 1 | Player 2 (2P mode) |
 |---|---|---|
-| Move up | `↑` or `W` | `I` or mouse/touch right side |
+| Move up | `↑` or `W` | `I` |
 | Move down | `↓` or `S` | `K` |
-| Serve / advance | `Space` or tap | — |
+| Serve / advance | `Space` or `Enter` | — |
+
+### Phone / tablet (touch)
+
+| Action | How |
+|---|---|
+| Move your paddle | Drag on the **left half** of the screen |
+| Move P2 paddle (2P mode) | Drag on the **right half** |
+| Serve | Tap anywhere |
+| Enter your name | Tap the name box → keyboard appears; tap **OK ✓** |
 
 ---
 

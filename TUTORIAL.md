@@ -1,9 +1,9 @@
 # Build a Tennis Game with IBM Bob — Step-by-Step Tutorial
 
 > **What you'll build:** A fully playable browser tennis game in a single HTML file —
-> no framework, no server, no install. Just open it and play.
+> no framework, no server, no install. Open it on a laptop or share the link to a phone.
 >
-> **Works on:** Desktop (keyboard + mouse) and **smartphone / tablet (full touch screen)**.
+> **Works on:** laptop (keyboard + mouse) and smartphone / tablet (full touch screen) — equally.
 > **How long it takes:** ~90 minutes end-to-end, following this guide.
 > Each step is a prompt you paste into IBM Bob (or any AI coding assistant).
 
