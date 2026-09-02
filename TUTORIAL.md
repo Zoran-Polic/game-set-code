@@ -8,9 +8,7 @@
 > **What you will actually learn:** How to build software by having a conversation
 > with an AI assistant — the skill that works for any project, not just this game.
 
-> 🌐 **Want to see the finished game before you start?**
-> Play it now: [zoran-polic.github.io/game-set-code](https://zoran-polic.github.io/game-set-code/)
-> No install. Works on any phone or laptop. Come back here when you are ready to build it yourself.
+🌐 **Want to see the finished game before you start?** Play it now: [zoran-polic.github.io/game-set-code](https://zoran-polic.github.io/game-set-code/) — no install, works on any phone or laptop. Come back when you are ready to build it yourself.
 
 ---
 
@@ -146,6 +144,8 @@ You save it as `index.html` and open it in your browser.
 You play it. You notice what you like and what you want to change.
 Then you move to the next step — or go off-script and ask Bob for something else entirely.
 
+**End-to-end, all steps take about 90 minutes.** Each step stands on its own — stop and pick it up again any time.
+
 **The steps build on each other.** From Step 2 onward, each prompt says
 "upgrade my tennis game HTML file." To give Bob that context, paste the
 **entire contents** of your current `index.html` into the chat, then the prompt.
@@ -171,7 +171,7 @@ being back on solid ground.
 
 ---
 
-## How this tutorial works — what Bob is building
+## What's inside the file
 
 Every version in this tutorial is a single `index.html` file with this structure.
 You do not need this to follow the steps — it is here so you can find your way
@@ -413,8 +413,6 @@ These four steps are a menu, not a march. Here is how they fit together:
 **You can do 3a, 3b, and 3c in any order.** Each one adds a single feature to whatever
 version you currently have. If you want everything at once and are comfortable skipping
 the individual steps, go straight to 3d — the prompt there includes everything.
-
----
 
 ## Step 3a — Progressive difficulty and ball trail
 
@@ -706,8 +704,7 @@ Play a full tournament match. Specifically check:
 ### What is happening here
 
 Combining features is not just adding code together — it requires deliberate
-integration rules to prevent features from breaking each other. Three principles
-this step follows:
+integration rules to prevent features from breaking each other:
 
 **State resets at boundaries.** The CPU speed boost is a per-set state change.
 Without an explicit reset at set-start, Level 6 from Set 1 would carry into Set 2.
@@ -805,16 +802,6 @@ const isTouchDevice = () =>
 Called *while drawing each screen*, not once at startup.
 A Surface Pro user might detach the keyboard mid-game.
 The instruction text updates automatically.
-
-#### What the hidden input trick solves
-
-The canvas element cannot be focused for text input — it is a drawing surface,
-not a form field. On a phone, no keyboard will appear unless the browser has
-an `<input>` or `<textarea>` to focus. The hidden input (introduced in Step 2)
-solves this: it is invisible, off-screen, and zero-sized, but it is a real input
-that the browser can focus. When `.focus()` is called inside a tap handler,
-the phone keyboard appears as if the player tapped a normal text field.
-The typing syncs to game state via the `input` event listener in real time.
 
 ### If something feels off
 
@@ -966,9 +953,12 @@ Track words per minute. Show 10 words per round. Store the best score in localSt
 
 ## How to build anything with Bob — the transferable skill
 
-The tennis game is finished. The skill you used to build it applies to anything.
+You have built a game. Here is what you actually learned.
+> The prompts above are one game's worth of ideas. The section below is the skill
+> that generates all the ideas you will ever have on your own.
 
-Here is the pattern, stripped to its core:
+The skill — describing what you want, testing what you get, and refining the gap —
+applies to any project you will ever build. Here it is, stripped to its core:
 
 **1. Describe the simplest possible version.**
 Not the full vision — the first slice. Something you can test in under 5 minutes.
@@ -1015,7 +1005,9 @@ Describe the experience; let Bob find the mechanism.
 
 ## Concepts reference card
 
-For the curious — every concept used in this game, where it first appears, and what it does.
+Every concept used in this game, where it first appears, and what it does.
+If a "What is happening here" section caught your interest, use this table
+to find every related concept across all steps.
 
 | Concept | First appears | What it does |
 |---|---|---|
@@ -1044,13 +1036,10 @@ For the curious — every concept used in this game, where it first appears, and
 ## About this project
 
 Every line of code in this repository was generated through prompts to **IBM Bob** —
-IBM's AI coding assistant — then refined through follow-up prompts.
-No code was written by hand. The workflow described in this tutorial
-is exactly how the game was built.
+IBM's AI coding assistant — then refined through follow-up prompts. No code was written by hand.
 
-That same workflow applies to any project: a game, a tool, a website, a script,
-a data analysis, a presentation generator, a personal dashboard.
-The only prerequisite is being able to describe what you want.
+That workflow — describe, receive, test, refine — is exactly what this tutorial teaches.
+It applies to any project: a game, a tool, a website, a script, a data analysis, a dashboard.
 
 **If you can describe it, you can build it.**
 
