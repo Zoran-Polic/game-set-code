@@ -8,9 +8,13 @@
 > **What you will actually learn:** How to build software by having a conversation
 > with an AI assistant — the skill that works for any project, not just this game.
 
+> 🌐 **Want to see the finished game before you start?**
+> Play it now: [zoran-polic.github.io/game-set-code](https://zoran-polic.github.io/game-set-code/)
+> No install. Works on any phone or laptop. Come back here when you are ready to build it yourself.
+
 ---
 
-## Before you start — read this first
+## Before you start
 
 ### You need exactly three things
 
@@ -33,66 +37,6 @@ game file. Everything else in this tutorial explains what to do with it.
 If you do not have access to IBM Bob yet, ask whoever invited you to this tutorial
 to share the link. Once you have it open, you are ready.
 
----
-
-### The most important thing to understand before writing a single prompt
-
-**You cannot break anything.**
-
-Every time Bob gives you code, you get a complete, self-contained file.
-If you don't like what you get, you paste the previous version back and try a different prompt.
-If you lose track of where you were, every working version is saved in this repository —
-open any of the `v1`, `v2`, `v3a`, `v3b`, `v3c`, `v3d` folders and you are back on solid ground.
-
-Bob can undo, redo, rewrite, and refine anything in this domain without limit.
-There is no mistake you can make here that cannot be reversed in under a minute.
-
-**That means: experiment freely. Ask for things that seem too ambitious.
-Push Bob further than feels safe. The worst outcome is you paste the previous version back.**
-
-This is not a cautious tutorial. It is an invitation to play.
-
----
-
-### The feedback loop — the most important habit in this tutorial
-
-Before you write your first prompt, understand the cycle that makes vibe-coding work.
-Every step in this tutorial follows the same loop:
-
-```
-Prompt Bob  →  Receive the file  →  Save it  →  Open in browser  →  Play it
-     ↑                                                                    |
-     └────────────── Describe what to change  ←  Notice what feels off ──┘
-```
-
-**Stop prompting and start playing after every step.**
-Your fingers will tell you what is wrong faster than reading the code ever will.
-The best game designers are not necessarily the best programmers —
-they are the people who play obsessively and notice what feels wrong.
-**That skill is yours already.**
-
-Prompt vocabulary you do not need: JavaScript, canvas, function, variable, array.
-Prompt vocabulary you do need: *fast*, *slow*, *cluttered*, *fair*, *satisfying*, *boring*.
-
----
-
-### What IBM Bob is — and how this tutorial uses it
-
-IBM Bob is an AI coding assistant. You describe what you want in plain English.
-Bob writes the code. You test it. You describe what to change. Bob rewrites it.
-That loop — describe, receive, test, feel, refine — is the entire workflow.
-
-You do not need to understand the code Bob writes to use this tutorial.
-Understanding will come naturally as you read the "What is happening here" sections,
-but it is never a prerequisite for moving to the next step.
-
-The prompts in this tutorial are carefully written to produce good results,
-but they are not magic spells. Bob will sometimes produce something slightly different
-from what is shown here. That is normal. Test it, play it, and if something feels wrong,
-the next section tells you exactly how to respond.
-
----
-
 ### Playing on a smartphone — no keyboard needed
 
 The finished game is fully touch-screen playable from the very first version.
@@ -106,9 +50,91 @@ If you are following this tutorial on a phone, everything works.
 | Enter your name | Tap the name box — your phone keyboard appears automatically |
 | Mute / unmute sound | Tap the 🔊 button in the top-right corner |
 
-> **Share the link:** Once you have a working version, open it in a browser on your phone,
-> share the URL with a friend, and they can play it on their phone immediately.
-> No install. No account. Just a link.
+> **Share the link:** Once you have a working version, share the URL with a friend
+> and they can play it on their phone immediately. No install. No account. Just a link.
+
+---
+
+## Two things to understand before you write your first prompt
+
+### You cannot break anything
+
+Every time Bob gives you code, you get a complete, self-contained file.
+If you don't like what you get, paste the previous version back and try a different prompt.
+If you lose track of where you were, every working version is saved in this repository —
+open any of the `v1`, `v2`, `v3a`, `v3b`, `v3c`, `v3d` folders and you are back on solid ground.
+
+Bob can undo, redo, rewrite, and refine anything in this domain without limit.
+There is no mistake you can make here that cannot be reversed in under a minute.
+
+**That means: experiment freely. Ask for things that seem too ambitious.
+Push Bob further than feels safe. The worst outcome is you paste the previous version back.**
+
+This is not a cautious tutorial. It is an invitation to play.
+
+### The feedback loop
+
+Every step in this tutorial follows the same cycle. Understanding it before you start
+means you will know exactly what to do at every stage — including when something feels wrong.
+
+```
+Prompt Bob  →  Receive the file  →  Save it  →  Open in browser  →  Play it
+     ↑                                                                    |
+     └────────────── Describe what to change  ←  Notice what feels off ──┘
+```
+
+**Stop prompting and start playing after every step.**
+Your fingers will tell you what is wrong faster than reading the code ever will.
+
+Prompt vocabulary you do not need: JavaScript, canvas, function, variable, array.
+Prompt vocabulary you do need: *fast*, *slow*, *cluttered*, *fair*, *satisfying*, *boring*.
+
+The best game designers are not necessarily the best programmers —
+they are the people who play obsessively and notice what feels wrong.
+**That skill is yours already.**
+
+---
+
+## How to prompt well — before you begin
+
+You do not need to be a programmer to use Bob effectively.
+These habits apply from your very first prompt.
+
+### Be specific about what you see, not what you think the code should do
+
+| ❌ Vague | ✅ Specific |
+|---|---|
+| "Make it better" | "The CPU paddle snaps instantly to the ball — make it feel like it has weight and momentum" |
+| "Fix the bug" | "When I miss the ball, the next serve fires immediately with no pause — add a 1-second delay" |
+| "Make it more fun" | "Add a short screen-flash effect when someone scores a point" |
+| "Improve the graphics" | "Draw a net in the middle of the court — a thin white rectangle with a small white post at the top" |
+
+### Always describe the constraint alongside the change
+
+> "Add a slow-motion effect when the ball is about to go out of bounds —
+> **but only for half a second and only if the player is close to the ball**."
+
+Constraints are what separate a fun feature from a broken one. Bob respects them.
+
+### Trust the first result — then refine
+
+Bob's first answer is rarely perfect and does not need to be.
+Accept it, test it, then give a follow-up prompt describing specifically what to change.
+Two focused prompts reliably beat one overly-specified prompt.
+
+### When Bob gets it wrong
+
+Sometimes Bob misunderstands a prompt. Sometimes the result has a bug.
+Neither is a reason to stop.
+
+The recovery is always the same:
+1. Describe exactly what is wrong in plain language
+2. Add: *"The rest of the game should stay exactly as it is."*
+3. If Bob introduces a new problem while fixing the old one: paste the previous
+   working version back into the chat and try a differently-worded prompt
+
+Bob learns from context within a session. The more specific your description
+of the problem, the more targeted the fix.
 
 ---
 
@@ -118,54 +144,38 @@ Each step gives you one prompt to paste into IBM Bob.
 Bob returns a complete HTML file.
 You save it as `index.html` and open it in your browser.
 You play it. You notice what you like and what you want to change.
-Then you move to the next step — or you go off-script and ask Bob for something else entirely.
+Then you move to the next step — or go off-script and ask Bob for something else entirely.
 
-### How to give Bob the previous file
+**The steps build on each other.** From Step 2 onward, each prompt says
+"upgrade my tennis game HTML file." To give Bob that context, paste the
+**entire contents** of your current `index.html` into the chat, then the prompt.
+Bob reads both together and knows exactly what to change.
 
-From Step 2 onward, each prompt says "upgrade my tennis game HTML file."
-To give Bob that context, paste the **entire contents** of your current `index.html`
-into the chat before (or after) the prompt text. Bob reads both together.
-
-Most Bob interfaces have a way to attach or paste large blocks of text —
-look for a paperclip icon, a code block button, or simply paste the file contents
-directly into the message box before the prompt. Either way works.
-
-If you are unsure, just paste the full file contents first, then the prompt on a new line.
-Bob will figure out what is the file and what is the instruction.
-
-**The steps build on each other.** Each prompt says "upgrade my tennis game" —
-you always give Bob the file it just produced, so the full context carries forward.
-Only Step 1 starts from nothing.
+> **Not sure how to paste the file?** Look for a paperclip icon or code block button
+> in the Bob interface. Or simply paste the file contents directly into the message box
+> before the prompt text — Bob will figure out what is the file and what is the instruction.
 
 **The reference versions are always there.** Every step has a working result saved
 in this repository (`v1/index.html`, `v2/index.html`, etc.). If your version diverges
 or something stops working, open the reference version, continue from there, and keep going.
 
 **Save before you change.** Before asking Bob to make a significant change,
-save a copy of the file you have. If the new version is worse, you have an immediate
-fallback. Rename it `index-v2-working.html` or anything you will recognise.
+save a copy of the file you have. Rename it `index-v2-working.html` or anything
+you will recognise. If the new version is worse, you are one file-open away from
+being back on solid ground.
+
+> **Windows note:** When saving a new file in Notepad, change "Save as type" to
+> *All Files (*.*)* and name it `index.html` explicitly — otherwise Notepad
+> silently adds `.txt` and the browser will not recognise it as a web page.
+> If the browser shows a blank page or raw code, that is almost always why.
 
 ---
 
-## A note on saving files
-
-**Windows users:** When you save a new file in Notepad, it may default to
-`index.html.txt` — adding `.txt` invisibly. The browser will not recognise it as
-a web page. In the Save dialog, change "Save as type" to *All Files (*.*)* and
-name it `index.html` explicitly.
-
-**If the browser shows a blank page or raw code:** The file probably saved with
-the wrong extension. Rename it to end in `.html` and reload.
-
-**If nothing appears at all:** Make sure you are opening the file in a browser
-(double-click it, or drag it onto an open browser window) — not in a text editor.
-
----
-
-## The architecture — what Bob is building for you
+## How this tutorial works — what Bob is building
 
 Every version in this tutorial is a single `index.html` file with this structure.
-You do not need to memorise this — it is here so you can find your way around when you are curious.
+You do not need this to follow the steps — it is here so you can find your way
+around the code when you are curious.
 
 ```
 index.html
@@ -240,9 +250,6 @@ Play a full game against the CPU. Try it on your phone too.
 
 ### If something feels off
 
-Play the game. Then ask yourself: does anything feel wrong?
-Some things people often notice after Step 1:
-
 - *"The CPU is too fast"* →
   `Make the CPU paddle slower and less accurate — I want young children to be able to win most of the time.`
 - *"The ball is too fast"* →
@@ -265,6 +272,11 @@ Bob will incorporate your change and give you back a complete updated file.
 court theme, ball style, and game mode. Win/loss stats that survive page reloads.
 Confetti on win. Richer sound. Full 2-player mode.
 **Time:** about 20 minutes.
+
+> **Note:** This is the biggest single step — eight features at once. Bob may not
+> get every detail right on the first try, and that is completely fine. Play what
+> you get, pick the one thing that feels most off, and refine it with a follow-up prompt.
+> You do not need it to be perfect before moving on.
 
 ### The prompt
 
@@ -386,6 +398,21 @@ The value syncs back into the game state in real time.
   `Make the name entry box larger and more obvious on the name screen. The OK button should be big and clearly labelled.`
 - *"The confetti feels slow"* →
   `Make the confetti burst faster and more energetic — more particles, higher initial velocity.`
+
+---
+
+## Steps 3a, 3b, 3c, 3d — adding features
+
+These four steps are a menu, not a march. Here is how they fit together:
+
+- **3a** adds progressive CPU difficulty and a ball trail — independently, to any version
+- **3b** adds power-ups — independently, to any version
+- **3c** adds tournament mode — independently, to any version
+- **3d** combines all three into one integrated file
+
+**You can do 3a, 3b, and 3c in any order.** Each one adds a single feature to whatever
+version you currently have. If you want everything at once and are comfortable skipping
+the individual steps, go straight to 3d — the prompt there includes everything.
 
 ---
 
@@ -800,51 +827,7 @@ The typing syncs to game state via the `input` event listener in real time.
 
 ---
 
-## The vibe-coding mindset — how to prompt well
-
-You do not need to be a programmer to use Bob effectively.
-But a few habits make the difference between good results and great results.
-
-### Be specific about what you see, not what you think the code should do
-
-| ❌ Vague | ✅ Specific |
-|---|---|
-| "Make it better" | "The CPU paddle snaps instantly to the ball — make it feel like it has weight and momentum" |
-| "Fix the bug" | "When I miss the ball, the next serve fires immediately with no pause — add a 1-second delay" |
-| "Make it more fun" | "Add a short screen-flash effect when someone scores a point" |
-| "Improve the graphics" | "Draw a net in the middle of the court — a thin white rectangle with a small white post at the top" |
-
-### Always describe the constraint alongside the change
-
-> "Add a slow-motion effect when the ball is about to go out of bounds —
-> **but only for half a second and only if the player is close to the ball**."
-
-Constraints are what separate a fun feature from a broken one.
-Bob respects them.
-
-### Trust the first result — then refine
-
-Bob's first answer is rarely perfect and does not need to be.
-Accept it, test it, then give a follow-up prompt that describes specifically
-what to change. Two focused prompts reliably beat one overly-specified prompt.
-
-### When Bob gets it wrong
-
-Sometimes Bob misunderstands a prompt. Sometimes the result has a bug.
-Neither is a reason to stop.
-
-The recovery is always the same:
-1. Describe exactly what is wrong in plain language
-2. Add: *"The rest of the game should stay exactly as it is."*
-3. If Bob introduces a new problem while fixing the old one: paste the previous
-   working version back into the chat and try a differently-worded prompt
-
-Bob learns from context within a session. Describe what you tried and what happened.
-The more specific your description of the problem, the more targeted the fix.
-
----
-
-## Going further — 12 prompts to take this anywhere
+## Going further — prompts to take this anywhere
 
 Once you have completed all the steps, the game is yours to take in any direction.
 These prompts work as starting points — modify them, combine them, or use them
