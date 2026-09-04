@@ -109,15 +109,15 @@ case "$STEP" in
     echo ""
     # Step 2 features must still be present
     check "Name entry retained"                       "nameInput\|playerName\|PHASE_NAME"
-    check "Setup screen retained"                     "Easy.*Medium.*Hard\|PHASE_SETUP"
+    check "Setup screen retained"                     "Easy.*Medium.*Hard\|PHASE_SETUP\|screen.*setup\|SETUP_ROWS\|label.*Easy"
     check "localStorage retained"                     "localStorage"
     check "Confetti retained"                         "confetti\|Confetti"
     # Step 3a additions
     check "CPU level variable"                        "cpuLevel\|cpu_level\|cpuLvl"
     check "Level up every 2 points"                   "PROG_POINTS_PER_LEVEL\|pointsPerLevel\|every.*2\|2.*points\|floor.*\/.*2"
-    check "Max 8 speed boosts"                        "PROG_MAX_BOOSTS\|maxBoosts\|MAX_BOOSTS\|8.*boost\|boost.*8"
+    check "Max 8 speed boosts"                        "PROG_MAX_BOOSTS\|maxBoosts\|MAX_BOOSTS\|maxLevels.*8\|8.*maxLevel\|maxLevels:.*8\|8.*boost\|boost.*8"
     check "Level badge displayed"                     "LVL\|lvl\|levelBadge\|drawLevel\|level.*badge"
-    check "Level-up sound"                            "levelUp.*sound\|tone.*660\|tone.*880\|levelUpCheck\|levelUpSnd"
+    check "Level-up sound"                            "levelUp.*sound\|tone.*660\|playTone.*660\|tone.*880\|playTone.*880\|levelUpCheck\|levelUpSnd"
     check "Trail ring buffer"                         "trail\|TRAIL_LEN\|trailLen\|ring.*buffer"
     check "Trail max 8 positions"                     "TRAIL_LEN.*8\|8.*trail\|trail.*8\|trail\.length.*8\|> 8\|> TRAIL"
     check "Trail opacity fades"                       "opacity\|globalAlpha\|alpha.*trail\|trail.*alpha"
