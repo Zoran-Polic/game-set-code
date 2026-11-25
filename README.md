@@ -16,6 +16,10 @@
 > Works on any modern browser: Chrome, Firefox, Edge, Safari.
 > Keyboard + mouse on desktop · full touch controls on mobile · no install, no login.
 
+## Why this project exists
+
+[Read the technical case study](CASE-STUDY.md): how the project uses small, working versions and zero-install delivery to support learning by building.
+
 ---
 
 ## Versions
