@@ -1,4 +1,4 @@
-# 🎾 GAME, SET, CODE — Tennis Mini-Game
+not# 🎾 GAME, SET, CODE — Tennis Mini-Game
 
 **IBM Volunteer Event · Sep 9, 2026 · Durham, NC · Built with IBM Bob**
 
@@ -16,7 +16,7 @@
 > Works on any modern browser: Chrome, Firefox, Edge, Safari.
 > Keyboard + mouse on desktop · full touch controls on mobile · no install, no login.
 
-![Game, Set, Code start screen](assets/game-set-code-start.png)
+![Game, Set, Code start screen](assets/game-set-code-live-20261125.png)
 
 
 ## Why this project exists
