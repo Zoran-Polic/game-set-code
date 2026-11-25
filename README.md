@@ -1,4 +1,4 @@
-not# 🎾 GAME, SET, CODE — Tennis Mini-Game
+# 🎾 GAME, SET, CODE — Tennis Mini-Game
 
 **IBM Volunteer Event · Sep 9, 2026 · Durham, NC · Built with IBM Bob**
 
